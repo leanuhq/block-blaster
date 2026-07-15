@@ -38,6 +38,7 @@
             flex-direction: column;
             align-items: center;
             gap: 5px;
+            position: relative;
         }
 
         .score-value {
@@ -88,6 +89,31 @@
 
         .best-score span {
             color: var(--primary-color);
+        }
+
+        /* Bouton Paramètres Épuré */
+        .settings-btn {
+            position: absolute;
+            top: 5px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: scale(1.05);
         }
 
         /* Plateau de Jeu */
@@ -208,6 +234,152 @@
                         0 2px 4px rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(0, 0, 0, 0.1);
         }
+
+        /* Modal Paramètres Moderne */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 8, 0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(12px);
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-content {
+            background: #111116;
+            padding: 30px;
+            border-radius: 28px;
+            width: 85%;
+            max-width: 320px;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .modal-content h3 {
+            margin: 0;
+            font-size: 1.4rem;
+            text-align: center;
+            letter-spacing: 1px;
+            font-weight: 800;
+        }
+
+        .setting-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .setting-row label {
+            font-size: 0.8rem;
+            color: #62627a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        /* Slider Stylisé */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #1a1a23;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* Color Picker Stylisé */
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .color-picker-input {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 45px;
+            height: 45px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .color-picker-input::-webkit-color-swatch {
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .color-value-text {
+            font-family: monospace;
+            background: #08080c;
+            padding: 12px;
+            border-radius: 10px;
+            flex-grow: 1;
+            text-align: center;
+            font-weight: bold;
+            border: 1px solid rgba(255,255,255,0.03);
+            color: #a0a0ba;
+        }
+
+        .btn-block {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 16px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-close {
+            background: var(--primary-color);
+            color: #08080c;
+            box-shadow: 0 6px 15px rgba(78, 205, 196, 0.25);
+        }
+
+        .btn-close:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+        }
+
+        .btn-quit {
+            background: transparent;
+            color: #ff5e7e;
+            border: 1px solid rgba(255, 94, 126, 0.15);
+            margin-top: -5px;
+        }
+
+        .btn-quit:hover {
+            background: rgba(255, 94, 126, 0.05);
+            border-color: rgba(255, 94, 126, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -216,11 +388,34 @@
         <div class="score-value" id="score">0</div>
         <div class="combo-badge" id="comboBadge">x1</div>
         <div class="best-score">MEILLEUR : <span id="best-score">0</span></div>
+        <button class="settings-btn" id="openSettings">⚙️</button>
     </div>
 
     <div class="game-container">
         <div class="board" id="board"></div>
         <div class="pieces-pool" id="piecesPool"></div>
+    </div>
+
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <h3>PARAMÈTRES</h3>
+            
+            <div class="setting-row">
+                <label>Sons</label>
+                <input type="range" id="volumeSlider" min="0" max="100" value="70">
+            </div>
+
+            <div class="setting-row">
+                <label>Thème Couleur</label>
+                <div class="color-picker-wrapper">
+                    <input type="color" id="colorPicker" class="color-picker-input" value="#4ecdc4">
+                    <div class="color-value-text" id="colorValueText">#4ECDC4</div>
+                </div>
+            </div>
+
+            <button class="btn-block btn-close" id="closeSettings">Fermer</button>
+            <button class="btn-block btn-quit" id="quitGame">Réinitialiser</button>
+        </div>
     </div>
 
     <script>
@@ -230,6 +425,9 @@
         const scoreElement = document.getElementById('score');
         const bestScoreElement = document.getElementById('best-score');
         const comboBadge = document.getElementById('comboBadge');
+        const modal = document.getElementById('settingsModal');
+        const colorPicker = document.getElementById('colorPicker');
+        const colorValueText = document.getElementById('colorValueText');
 
         let score = 0;
         let comboCount = 0;
@@ -669,6 +867,26 @@
             updateBoardUI();
             generateNewRound();
         }
+
+        // --- GESTION DES PARAMÈTRES ---
+        document.getElementById('openSettings').addEventListener('click', () => modal.style.display = 'flex');
+        document.getElementById('closeSettings').addEventListener('click', () => modal.style.display = 'none');
+        document.getElementById('quitGame').addEventListener('click', () => {
+            resetGame();
+            modal.style.display = 'none';
+        });
+
+        colorPicker.addEventListener('input', (e) => {
+            const hexColor = e.target.value.toUpperCase();
+            colorValueText.innerText = hexColor;
+            currentColor = hexColor;
+            document.documentElement.style.setProperty('--primary-color', hexColor);
+            updateBoardUI();
+        });
+
+        document.getElementById('volumeSlider').addEventListener('input', (e) => {
+            soundVolume = e.target.value / 100;
+        });
 
         createBoard();
         generateNewRound();
