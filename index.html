@@ -173,7 +173,7 @@
             background-color: var(--primary-color);
         }
 
-        /* Zone de sélection des pièces corrigée */
+        /* Zone de sélection des pièces */
         .pieces-pool {
             display: flex;
             justify-content: space-around;
@@ -205,16 +205,13 @@
             position: absolute;
             user-select: none;
             touch-action: none;
+            will-change: transform; /* Optimisation performances mobiles */
         }
 
         .piece.dragging {
             cursor: grabbing;
             z-index: 1000;
             pointer-events: none;
-            position: fixed; /* Évite les décalages de calcul par rapport aux parents */
-            left: 0;
-            top: 0;
-            transform-origin: center center;
         }
 
         .piece-cell {
@@ -566,11 +563,11 @@
         }
 
         function setupDragAndDrop(pieceEl, shape, id) {
-            let startX, startY;
+            let startTouchX = 0, startTouchY = 0;
+            let currentX = 0, currentY = 0;
             let isDragging = false;
             let offsetTouchY = 0;
-            let lastPointerX = 0;
-            let lastPointerY = 0;
+            let lastPointerX = 0, lastPointerY = 0;
 
             const onStart = (e) => {
                 e.preventDefault();
@@ -579,14 +576,21 @@
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 
+                // On récupère le centre de l'élément pour que le doigt se positionne pile au milieu
                 const rect = pieceEl.getBoundingClientRect();
-                startX = clientX - rect.left;
-                startY = clientY - rect.top;
+                const elementCenterX = rect.left + rect.width / 2;
+                const elementCenterY = rect.top + rect.height / 2;
                 
-                offsetTouchY = e.touches ? 70 : 0; 
+                // Stockage du point d'origine du toucher
+                startTouchX = clientX;
+                startTouchY = clientY;
+
+                // Sur mobile, décale la pièce légèrement au-dessus du doigt pour qu'elle soit visible
+                offsetTouchY = e.touches ? 75 : 0; 
 
                 pieceEl.classList.add('dragging');
                 
+                // Passage instantané aux dimensions d'un bloc du plateau (44px)
                 pieceEl.querySelectorAll('.piece-cell').forEach(c => {
                     c.style.width = '44px';
                     c.style.height = '44px';
@@ -608,14 +612,16 @@
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-                const targetX = clientX - (pieceEl.offsetWidth / 2);
-                const targetY = clientY - (pieceEl.offsetHeight / 2) - offsetTouchY;
+                // Calcul du déplacement physique relatif à l'origine
+                currentX = clientX - startTouchX;
+                currentY = (clientY - startTouchY) - offsetTouchY;
 
-                pieceEl.style.left = `${targetX}px`;
-                pieceEl.style.top = `${targetY}px`;
+                // Application d'un translate3D ultra-fluide sans toucher à "fixed" ou "absolute"
+                pieceEl.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
                 
-                lastPointerX = clientX;
-                lastPointerY = clientY - offsetTouchY;
+                const dragRect = pieceEl.getBoundingClientRect();
+                lastPointerX = dragRect.left + (dragRect.width / 2);
+                lastPointerY = dragRect.top + (dragRect.height / 2);
 
                 clearPreview();
 
@@ -663,15 +669,13 @@
                     }
                 }
 
-                // SI LE DEPOT ECHOUE OU QU'ON RELACHE : Nettoyage immédiat de TOUTES les propriétés inline de la pièce
+                // SI ECHEC ou RELACHE : Reset instantané et retour à la case départ sans glitch
                 if (!placedSuccessfully) {
                     playSynthSound(120, 'sawtooth', 0.1);
                     
                     pieceEl.classList.remove('dragging');
-                    // On retire toutes les surcharges d'affichage en ligne pour forcer le retour à l'état original CSS
-                    pieceEl.style.left = '';
-                    pieceEl.style.top = '';
-                    
+                    pieceEl.style.transform = 'translate3d(0, 0, 0)'; // Retour physique à l'origine
+
                     const rows = Math.max(...shape.map(b => b[0])) + 1;
                     const cols = Math.max(...shape.map(b => b[1])) + 1;
                     pieceEl.style.gridTemplateRows = `repeat(${rows}, 20px)`;
