@@ -395,7 +395,7 @@
 
         let score = 0;
         let comboCount = 0;
-        let baseLinePoints = 3500; 
+        let isFirstRound = true; // Pour savoir si on doit donner les blocs de départ obligatoires
         let bestScore = localStorage.getItem('block_blast_best') || 0;
         bestScoreElement.innerText = bestScore;
 
@@ -421,6 +421,7 @@
             } catch(e){}
         }
 
+        // Modèles de pièces de base
         const pieceTemplates = [
             [[0,0], [0,1]], 
             [[0,0], [1,0]], 
@@ -431,9 +432,6 @@
             [[0,0], [0,1], [0,2], [0,3], [0,4]], 
             [[0,0], [1,0], [2,0], [3,0], [4,0]], 
             [[0,0], [0,1], [1,0], [1,1]], 
-            [[0,0], [0,1], [0,2], [1,0], [1,1], [1,2], [2,0], [2,1], [2,2]], 
-            [[0,0], [0,1], [1,0], [1,1], [2,0], [2,1]], 
-            [[0,0], [0,1], [0,2], [1,0], [1,1], [1,2]], 
             [[0,0], [1,0], [1,1]], 
             [[0,1], [1,1], [1,0]], 
             [[0,0], [0,1], [1,0]], 
@@ -446,6 +444,10 @@
             [[0,0], [0,1], [1,1], [1,2]], 
             [[0,0], [1,0], [1,1], [2,1]]
         ];
+
+        // Blocs spéciaux pour le début de partie
+        const block3x3 = [[0,0], [0,1], [0,2], [1,0], [1,1], [1,2], [2,0], [2,1], [2,2]];
+        const block3x2 = [[0,0], [0,1], [1,0], [1,1], [2,0], [2,1]];
 
         const emergencyPiece = [[0,0]];
 
@@ -479,8 +481,18 @@
             }
         }
 
-        function getSmartPieceTemplate(forceEmergency = false) {
+        function getSmartPieceTemplate(index, forceEmergency = false) {
             if (forceEmergency) return emergencyPiece;
+            
+            // Si c'est le début de la partie, on impose deux 3x3 et un 3x2
+            if (isFirstRound) {
+                if (index === 0 || index === 1) {
+                    return block3x3;
+                } else {
+                    return block3x2;
+                }
+            }
+
             const shuffled = [...pieceTemplates].sort(() => Math.random() - 0.5);
             return shuffled[0];
         }
@@ -518,8 +530,8 @@
                 pieceElement.classList.add('piece');
                 pieceElement.dataset.index = i;
 
-                const forceEmergency = (i === 2 && !currentBoardAllowsPlacing);
-                const shape = getSmartPieceTemplate(forceEmergency);
+                const forceEmergency = (i === 2 && !currentBoardAllowsPlacing && !isFirstRound);
+                const shape = getSmartPieceTemplate(i, forceEmergency);
 
                 if (canPieceFitSomewhere(shape)) {
                     currentBoardAllowsPlacing = true;
@@ -533,18 +545,14 @@
                 const pieceMatrix = Array(rows).fill(null).map(() => Array(cols).fill(0));
                 shape.forEach(b => pieceMatrix[b[0]][b[1]] = 1);
 
-                // On stocke l'emplacement réel de chaque bloc physique pour les retrouver facilement
-                let cellId = 0;
                 pieceMatrix.forEach((row, r) => {
                     row.forEach((val, c) => {
                         const cell = document.createElement('div');
                         if (val === 1) {
                             cell.classList.add('piece-cell');
                             cell.style.backgroundColor = currentColor;
-                            // Associe les coordonnées logiques relatives de la matrice
                             cell.dataset.relRow = r;
                             cell.dataset.relCol = c;
-                            cellId++;
                         } else {
                             cell.style.background = 'transparent';
                             cell.style.border = 'none';
@@ -566,6 +574,8 @@
 
                 setupDragAndDrop(pieceElement, shape, i);
             }
+            // Une fois la distribution initiale faite, on désactive la règle des blocs géants
+            isFirstRound = false;
         }
 
         function setupDragAndDrop(pieceEl, shape, id) {
@@ -575,8 +585,8 @@
             let offsetTouchY = 0;
             let lastPointerX = 0, lastPointerY = 0;
             
-            let targetCellOffsetRow = 0;
-            let targetCellOffsetCol = 0;
+            let dragOffsetRow = 0;
+            let dragOffsetCol = 0;
 
             const onStart = (e) => {
                 e.preventDefault();
@@ -603,8 +613,8 @@
                 pieceEl.style.gridTemplateRows = `repeat(${rows}, 44px)`;
                 pieceEl.style.gridTemplateColumns = `repeat(${cols}, 44px)`;
 
-                // RECENTRAAGE PARFAIT ET STABLE :
-                // On détecte quel sous-bloc physique précis de la pièce est le plus proche de notre point de contact initial
+                // ALIGNEMENT GÉOMÉTRIQUE ABSOLU ET SYNC DE L'OMBRE :
+                // On détecte la cellule physique la plus proche du doigt pour en faire notre ancre
                 const subCells = pieceEl.querySelectorAll('.piece-cell');
                 let closestSubCell = subCells[0];
                 let minSubDist = Infinity;
@@ -620,22 +630,17 @@
                     }
                 });
 
-                // On stocke le décalage de coordonnées logiques (ex: [1, 0]) du bloc sélectionné
-                // pour corriger la preview logicielle lors de l'aimantage
-                targetCellOffsetRow = parseInt(closestSubCell.dataset.relRow);
-                targetCellOffsetCol = parseInt(closestSubCell.dataset.relCol);
+                // On extrait précisément le décalage relatif de cette cellule pour l'aimantage futur
+                dragOffsetRow = parseInt(closestSubCell.dataset.relRow);
+                dragOffsetCol = parseInt(closestSubCell.dataset.relCol);
 
-                // On applique une translation pour que le centre géométrique de ce bloc précis se place pile sous notre curseur
+                // Calcule le recentrage pour coller le doigt parfaitement sur ce bloc
                 const targetRect = closestSubCell.getBoundingClientRect();
-                const currentSubCenterGlobalX = targetRect.left + (targetRect.width / 2);
-                const currentSubCenterGlobalY = targetRect.top + (targetRect.height / 2);
+                const subCenterX = targetRect.left + (targetRect.width / 2);
+                const subCenterY = targetRect.top + (targetRect.height / 2);
 
-                const correctionX = currentSubCenterGlobalX - clientX;
-                const correctionY = currentSubCenterGlobalY - clientY;
-
-                // Application du point d'origine corrigé
-                startTouchX += correctionX;
-                startTouchY += correctionY;
+                startTouchX += (subCenterX - clientX);
+                startTouchY += (subCenterY - clientY);
 
                 playSynthSound(400, 'sine', 0.05);
                 onMove(e);
@@ -652,11 +657,10 @@
 
                 pieceEl.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
                 
-                // On aligne précisément l'aimantage sur la position physique de la première cellule logique de la pièce [0,0]
-                // en cherchant la cellule DOM qui possède l'attribut relRow="0" et relCol="0" (ou le premier disponible)
-                const originCell = pieceEl.querySelector(`[data-rel-row='0'][data-rel-col='0']`) || pieceEl.querySelector('.piece-cell');
-                if (originCell) {
-                    const rect = originCell.getBoundingClientRect();
+                // Pour l'aimantage, on cible l'ancre physique qui correspond exactement au bloc sélectionné sous le doigt
+                const activeAncreCell = pieceEl.querySelector(`[data-rel-row='${dragOffsetRow}'][data-rel-col='${dragOffsetCol}']`);
+                if (activeAncreCell) {
+                    const rect = activeAncreCell.getBoundingClientRect();
                     lastPointerX = rect.left + (rect.width / 2);
                     lastPointerY = rect.top + (rect.height / 2);
                 }
@@ -665,8 +669,9 @@
 
                 const targetCell = getCellUnderPoint(lastPointerX, lastPointerY);
                 if (targetCell) {
-                    const startR = parseInt(targetCell.dataset.row);
-                    const startC = parseInt(targetCell.dataset.col);
+                    // On calcule la ligne et colonne de départ virtuelles de la pièce entière (le coin [0,0])
+                    const startR = parseInt(targetCell.dataset.row) - dragOffsetRow;
+                    const startC = parseInt(targetCell.dataset.col) - dragOffsetCol;
                     if (canPlacePiece(shape, startR, startC)) {
                         showPreview(shape, startR, startC);
                     }
@@ -683,8 +688,8 @@
                 let placedSuccessfully = false;
 
                 if (targetCell) {
-                    const startR = parseInt(targetCell.dataset.row);
-                    const startC = parseInt(targetCell.dataset.col);
+                    const startR = parseInt(targetCell.dataset.row) - dragOffsetRow;
+                    const startC = parseInt(targetCell.dataset.col) - dragOffsetCol;
 
                     if (canPlacePiece(shape, startR, startC)) {
                         shape.forEach(block => {
@@ -699,7 +704,10 @@
                         updateBoardUI();
                         checkLines();
                         
+                        // Si on a terminé toute la parcelle (les 3 blocs)
                         if (activePieces.every(p => p.placed)) {
+                            comboCount++; // Le combo n'augmente que lorsqu'on vide la parcelle
+                            showComboUI();
                             generateNewRound();
                         } else {
                             checkGameOver();
@@ -738,7 +746,7 @@
         function getCellUnderPoint(x, y) {
             const cells = document.querySelectorAll('.cell');
             let nearestCell = null;
-            let minDistance = 24; // Aimantage précis pour une transition fluide et intuitive
+            let minDistance = 24; 
 
             for (let cell of cells) {
                 const rect = cell.getBoundingClientRect();
@@ -801,9 +809,6 @@
             const linesCount = rowsToClear.length + colsToClear.length;
 
             if (linesCount > 0) {
-                comboCount++;
-                showComboUI();
-
                 rowsToClear.forEach(r => {
                     for (let c = 0; c < BOARD_SIZE; c++) {
                         const cell = boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`);
@@ -817,7 +822,7 @@
                     }
                 });
 
-                playSynthSound(700 + (comboCount * 100), 'triangle', 0.3);
+                playSynthSound(700, 'triangle', 0.3);
 
                 rowsToClear.forEach(r => {
                     for (let c = 0; c < BOARD_SIZE; c++) grid[r][c] = null;
@@ -835,20 +840,16 @@
                     checkGameOver();
                 }, 250);
 
-                let calculatedScore = Math.round(baseLinePoints * linesCount * comboCount);
+                // Une ligne = 1000 points. Applique le multiplicateur de combo s'il y en a un de validé
+                let calculatedScore = 1000 * linesCount * comboCount;
                 score += calculatedScore;
                 scoreElement.innerText = score;
-
-                baseLinePoints = Math.round(baseLinePoints * 1.20);
 
                 if (score > bestScore) {
                     bestScore = score;
                     bestScoreElement.innerText = bestScore;
                     localStorage.setItem('block_blast_best', bestScore);
                 }
-            } else {
-                comboCount = 0;
-                hideComboUI();
             }
         }
 
@@ -883,7 +884,7 @@
         function resetGame() {
             score = 0;
             comboCount = 0;
-            baseLinePoints = 3500; 
+            isFirstRound = true;
             scoreElement.innerText = score;
             hideComboUI();
             grid = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
