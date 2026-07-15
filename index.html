@@ -28,7 +28,7 @@
             touch-action: none;
         }
 
-        /* GUI Épurée et Moderne */
+        /* GUI Épurée */
         .header {
             text-align: center;
             margin-bottom: 20px;
@@ -90,7 +90,6 @@
             color: var(--primary-color);
         }
 
-        /* Bouton Paramètres Épuré */
         .settings-btn {
             position: absolute;
             top: 5px;
@@ -142,18 +141,15 @@
             background-color: var(--cell-empty);
             border-radius: 10px;
             box-sizing: border-box;
-            transition: background-color 0.15s, transform 0.15s;
             position: relative;
             overflow: hidden;
         }
 
-        /* SUPPRESSION DU GLOW : Couleur unie et aplat moderne */
         .cell.filled {
             background-color: var(--primary-color);
             border: 1px solid rgba(0, 0, 0, 0.15);
         }
 
-        /* Explosion Clean */
         @keyframes block-pop {
             0% {
                 transform: scale(1);
@@ -168,23 +164,23 @@
         }
 
         .cell.exploding {
-            animation: block-pop 0.3s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+            animation: block-pop 0.25s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
             z-index: 10;
         }
 
         .cell.preview {
             opacity: 0.35;
-            background: var(--primary-color);
+            background-color: var(--primary-color);
         }
 
-        /* Zone de sélection des pièces */
+        /* Zone de sélection des pièces corrigée */
         .pieces-pool {
             display: flex;
             justify-content: space-around;
             align-items: center;
             width: 100%;
             max-width: 380px;
-            height: 130px;
+            height: 140px;
             background: rgba(17, 17, 22, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.03);
             padding: 10px;
@@ -209,26 +205,28 @@
             position: absolute;
             user-select: none;
             touch-action: none;
-            transition: transform 0.1s ease-out;
         }
 
         .piece.dragging {
             cursor: grabbing;
             z-index: 1000;
             pointer-events: none;
+            position: fixed; /* Évite les décalages de calcul par rapport aux parents */
+            left: 0;
+            top: 0;
+            transform-origin: center center;
         }
 
-        /* SUPPRESSION DU GLOW DES PIÈCES */
         .piece-cell {
-            width: 22px;
-            height: 22px;
-            border-radius: 6px;
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
             box-sizing: border-box;
             background-color: var(--primary-color);
             border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
-        /* Modal Paramètres Moderne */
+        /* Modal Paramètres */
         .modal {
             display: none;
             position: fixed;
@@ -241,7 +239,6 @@
             justify-content: center;
             align-items: center;
             backdrop-filter: blur(12px);
-            transition: opacity 0.3s ease;
         }
 
         .modal-content {
@@ -279,7 +276,6 @@
             font-weight: 700;
         }
 
-        /* Slider Stylisé */
         input[type="range"] {
             -webkit-appearance: none;
             width: 100%;
@@ -296,14 +292,8 @@
             border-radius: 50%;
             background: var(--primary-color);
             cursor: pointer;
-            transition: transform 0.1s;
         }
 
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-        }
-
-        /* Color Picker Stylisé */
         .color-picker-wrapper {
             display: flex;
             align-items: center;
@@ -354,20 +344,11 @@
             color: #08080c;
         }
 
-        .btn-close:hover {
-            transform: translateY(-2px);
-        }
-
         .btn-quit {
             background: transparent;
             color: #ff5e7e;
             border: 1px solid rgba(255, 94, 126, 0.15);
             margin-top: -5px;
-        }
-
-        .btn-quit:hover {
-            background: rgba(255, 94, 126, 0.05);
-            border-color: rgba(255, 94, 126, 0.3);
         }
     </style>
 </head>
@@ -388,12 +369,10 @@
     <div class="modal" id="settingsModal">
         <div class="modal-content">
             <h3>PARAMÈTRES</h3>
-            
             <div class="setting-row">
                 <label>Sons</label>
                 <input type="range" id="volumeSlider" min="0" max="100" value="70">
             </div>
-
             <div class="setting-row">
                 <label>Thème Couleur</label>
                 <div class="color-picker-wrapper">
@@ -401,7 +380,6 @@
                     <div class="color-value-text" id="colorValueText">#4ECDC4</div>
                 </div>
             </div>
-
             <button class="btn-block btn-close" id="closeSettings">Fermer</button>
             <button class="btn-block btn-quit" id="quitGame">Réinitialiser</button>
         </div>
@@ -420,7 +398,7 @@
 
         let score = 0;
         let comboCount = 0;
-        let baseLinePoints = 3500; // Base de points initiale demandée
+        let baseLinePoints = 3500; 
         let bestScore = localStorage.getItem('block_blast_best') || 0;
         bestScoreElement.innerText = bestScore;
 
@@ -533,7 +511,6 @@
         function generateNewRound() {
             piecesPoolElement.innerHTML = '';
             activePieces = [];
-
             let currentBoardAllowsPlacing = false;
             
             for (let i = 0; i < 3; i++) {
@@ -553,8 +530,8 @@
 
                 const rows = Math.max(...shape.map(b => b[0])) + 1;
                 const cols = Math.max(...shape.map(b => b[1])) + 1;
-                pieceElement.style.gridTemplateRows = `repeat(${rows}, 22px)`;
-                pieceElement.style.gridTemplateColumns = `repeat(${cols}, 22px)`;
+                pieceElement.style.gridTemplateRows = `repeat(${rows}, 20px)`;
+                pieceElement.style.gridTemplateColumns = `repeat(${cols}, 20px)`;
 
                 const pieceMatrix = Array(rows).fill(null).map(() => Array(cols).fill(0));
                 shape.forEach(b => pieceMatrix[b[0]][b[1]] = 1);
@@ -602,13 +579,14 @@
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 
-                startX = clientX;
-                startY = clientY;
-                offsetTouchY = e.touches ? 80 : 0;
+                const rect = pieceEl.getBoundingClientRect();
+                startX = clientX - rect.left;
+                startY = clientY - rect.top;
+                
+                offsetTouchY = e.touches ? 70 : 0; 
 
                 pieceEl.classList.add('dragging');
                 
-                // Correction d'affichage : redimensionnement précis des pièces lors du glisser-déposer
                 pieceEl.querySelectorAll('.piece-cell').forEach(c => {
                     c.style.width = '44px';
                     c.style.height = '44px';
@@ -630,14 +608,14 @@
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-                const dx = clientX - startX;
-                const dy = (clientY - startY) - offsetTouchY;
+                const targetX = clientX - (pieceEl.offsetWidth / 2);
+                const targetY = clientY - (pieceEl.offsetHeight / 2) - offsetTouchY;
 
-                pieceEl.style.transform = `translate(${dx}px, ${dy}px)`;
+                pieceEl.style.left = `${targetX}px`;
+                pieceEl.style.top = `${targetY}px`;
                 
-                const dragRect = pieceEl.getBoundingClientRect();
-                lastPointerX = dragRect.left + 22; 
-                lastPointerY = dragRect.top + 22;
+                lastPointerX = clientX;
+                lastPointerY = clientY - offsetTouchY;
 
                 clearPreview();
 
@@ -655,19 +633,6 @@
                 if (!isDragging) return;
                 isDragging = false;
                 
-                pieceEl.classList.remove('dragging');
-                pieceEl.style.transform = '';
-                
-                pieceEl.querySelectorAll('.piece-cell').forEach(c => {
-                    c.style.width = '22px';
-                    c.style.height = '22px';
-                    c.style.borderRadius = '6px';
-                });
-                const rows = Math.max(...shape.map(b => b[0])) + 1;
-                const cols = Math.max(...shape.map(b => b[1])) + 1;
-                pieceEl.style.gridTemplateRows = `repeat(${rows}, 22px)`;
-                pieceEl.style.gridTemplateColumns = `repeat(${cols}, 22px)`;
-
                 clearPreview();
 
                 const targetCell = getCellUnderPoint(lastPointerX, lastPointerY);
@@ -698,8 +663,25 @@
                     }
                 }
 
+                // SI LE DEPOT ECHOUE OU QU'ON RELACHE : Nettoyage immédiat de TOUTES les propriétés inline de la pièce
                 if (!placedSuccessfully) {
                     playSynthSound(120, 'sawtooth', 0.1);
+                    
+                    pieceEl.classList.remove('dragging');
+                    // On retire toutes les surcharges d'affichage en ligne pour forcer le retour à l'état original CSS
+                    pieceEl.style.left = '';
+                    pieceEl.style.top = '';
+                    
+                    const rows = Math.max(...shape.map(b => b[0])) + 1;
+                    const cols = Math.max(...shape.map(b => b[1])) + 1;
+                    pieceEl.style.gridTemplateRows = `repeat(${rows}, 20px)`;
+                    pieceEl.style.gridTemplateColumns = `repeat(${cols}, 20px)`;
+
+                    pieceEl.querySelectorAll('.piece-cell').forEach(c => {
+                        c.style.width = '';
+                        c.style.height = '';
+                        c.style.borderRadius = '';
+                    });
                 }
             };
 
@@ -781,7 +763,6 @@
                 comboCount++;
                 showComboUI();
 
-                // 1. Appliquer l'animation d'explosion
                 rowsToClear.forEach(r => {
                     for (let c = 0; c < BOARD_SIZE; c++) {
                         const cell = boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`);
@@ -797,7 +778,6 @@
 
                 playSynthSound(700 + (comboCount * 100), 'triangle', 0.3);
 
-                // 2. Vider instantanément la grille logique
                 rowsToClear.forEach(r => {
                     for (let c = 0; c < BOARD_SIZE; c++) grid[r][c] = null;
                 });
@@ -805,7 +785,6 @@
                     for (let r = 0; r < BOARD_SIZE; r++) grid[r][c] = null;
                 });
 
-                // 3. Nettoyage et fin d'animation
                 setTimeout(() => {
                     document.querySelectorAll('.cell.exploding').forEach(cell => {
                         cell.classList.remove('exploding', 'filled');
@@ -813,14 +792,12 @@
                     });
                     updateBoardUI();
                     checkGameOver();
-                }, 300);
+                }, 250);
 
-                // 4. Calcul des points (Nouveau système : 3500 points + 20% d'augmentation à chaque fois)
                 let calculatedScore = Math.round(baseLinePoints * linesCount * comboCount);
                 score += calculatedScore;
                 scoreElement.innerText = score;
 
-                // Augmente la valeur de base de 20% pour la prochaine ligne complétée
                 baseLinePoints = Math.round(baseLinePoints * 1.20);
 
                 if (score > bestScore) {
@@ -865,7 +842,7 @@
         function resetGame() {
             score = 0;
             comboCount = 0;
-            baseLinePoints = 3500; // Réinitialise aussi la base de score
+            baseLinePoints = 3500; 
             scoreElement.innerText = score;
             hideComboUI();
             grid = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
@@ -873,7 +850,7 @@
             generateNewRound();
         }
 
-        // --- GESTION DES PARAMÈTRES ---
+        // --- PARAMÈTRES ---
         document.getElementById('openSettings').addEventListener('click', () => modal.style.display = 'flex');
         document.getElementById('closeSettings').addEventListener('click', () => modal.style.display = 'none');
         document.getElementById('quitGame').addEventListener('click', () => {
@@ -887,7 +864,6 @@
             currentColor = hexColor;
             document.documentElement.style.setProperty('--primary-color', hexColor);
             
-            // Met à jour les pièces de la réserve
             document.querySelectorAll('.piece-cell').forEach(c => {
                 c.style.backgroundColor = hexColor;
             });
