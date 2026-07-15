@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Minimalist Block Puzzle</title>
+    <title>Fidèle Block Blast Clone</title>
     <style>
         :root {
             --bg-color: #08080c;
@@ -28,7 +28,6 @@
             touch-action: none;
         }
 
-        /* GUI Épurée */
         .header {
             text-align: center;
             margin-bottom: 20px;
@@ -109,12 +108,6 @@
             z-index: 10;
         }
 
-        .settings-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: scale(1.05);
-        }
-
-        /* Plateau de Jeu */
         .game-container {
             display: flex;
             flex-direction: column;
@@ -151,16 +144,8 @@
         }
 
         @keyframes block-pop {
-            0% {
-                transform: scale(1);
-                background: #ffffff !important;
-                opacity: 1;
-            }
-            100% {
-                transform: scale(0);
-                background: #ffffff !important;
-                opacity: 0;
-            }
+            0% { transform: scale(1); background: #ffffff !important; opacity: 1; }
+            100% { transform: scale(0); background: #ffffff !important; opacity: 0; }
         }
 
         .cell.exploding {
@@ -173,7 +158,6 @@
             background-color: var(--primary-color);
         }
 
-        /* Zone de sélection */
         .pieces-pool {
             display: flex;
             justify-content: space-around;
@@ -223,7 +207,6 @@
             border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
-        /* Modal Paramètres */
         .modal {
             display: none;
             position: fixed;
@@ -251,28 +234,10 @@
             gap: 20px;
         }
 
-        .modal-content h3 {
-            margin: 0;
-            font-size: 1.4rem;
-            text-align: center;
-            letter-spacing: 1px;
-            font-weight: 800;
-        }
-
-        .setting-row {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .setting-row label {
-            font-size: 0.8rem;
-            color: #62627a;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 700;
-        }
-
+        .modal-content h3 { margin: 0; font-size: 1.4rem; text-align: center; font-weight: 800; }
+        .setting-row { display: flex; flex-direction: column; gap: 10px; }
+        .setting-row label { font-size: 0.8rem; color: #62627a; text-transform: uppercase; font-weight: 700; }
+        
         input[type="range"] {
             -webkit-appearance: none;
             width: 100%;
@@ -281,7 +246,6 @@
             border-radius: 3px;
             outline: none;
         }
-
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             width: 18px;
@@ -291,62 +255,14 @@
             cursor: pointer;
         }
 
-        .color-picker-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .color-picker-input {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 45px;
-            height: 45px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0;
-        }
-
-        .color-picker-input::-webkit-color-swatch {
-            border-radius: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .color-value-text {
-            font-family: monospace;
-            background: #08080c;
-            padding: 12px;
-            border-radius: 10px;
-            flex-grow: 1;
-            text-align: center;
-            font-weight: bold;
-            border: 1px solid rgba(255,255,255,0.03);
-            color: #a0a0ba;
-        }
-
-        .btn-block {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 16px;
-            font-weight: 800;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-close {
-            background: var(--primary-color);
-            color: #08080c;
-        }
-
-        .btn-quit {
-            background: transparent;
-            color: #ff5e7e;
-            border: 1px solid rgba(255, 94, 126, 0.15);
-            margin-top: -5px;
-        }
+        .color-picker-wrapper { display: flex; align-items: center; gap: 15px; }
+        .color-picker-input { -webkit-appearance: none; appearance: none; width: 45px; height: 45px; background: none; border: none; cursor: pointer; padding: 0; }
+        .color-picker-input::-webkit-color-swatch { border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.1); }
+        .color-value-text { font-family: monospace; background: #08080c; padding: 12px; border-radius: 10px; flex-grow: 1; text-align: center; font-weight: bold; color: #a0a0ba; }
+        
+        .btn-block { width: 100%; padding: 14px; border: none; border-radius: 16px; font-weight: 800; font-size: 0.95rem; cursor: pointer; }
+        .btn-close { background: var(--primary-color); color: #08080c; }
+        .btn-quit { background: transparent; color: #ff5e7e; border: 1px solid rgba(255, 94, 126, 0.15); margin-top: -5px; }
     </style>
 </head>
 <body>
@@ -395,7 +311,7 @@
 
         let score = 0;
         let comboCount = 0;
-        let isFirstRound = true; // Pour savoir si on doit donner les blocs de départ obligatoires
+        let isFirstRound = true; 
         let bestScore = localStorage.getItem('block_blast_best') || 0;
         bestScoreElement.innerText = bestScore;
 
@@ -421,7 +337,6 @@
             } catch(e){}
         }
 
-        // Modèles de pièces de base
         const pieceTemplates = [
             [[0,0], [0,1]], 
             [[0,0], [1,0]], 
@@ -442,13 +357,12 @@
             [[0,1], [1,0], [1,1], [1,2], [2,1]], 
             [[0,1], [0,2], [1,0], [1,1]], 
             [[0,0], [0,1], [1,1], [1,2]], 
-            [[0,0], [1,0], [1,1], [2,1]]
+            [[0,0], [1,0], [1,1], [2,1]],
+            [[0,0]] 
         ];
 
-        // Blocs spéciaux pour le début de partie
         const block3x3 = [[0,0], [0,1], [0,2], [1,0], [1,1], [1,2], [2,0], [2,1], [2,2]];
         const block3x2 = [[0,0], [0,1], [1,0], [1,1], [2,0], [2,1]];
-
         const emergencyPiece = [[0,0]];
 
         function createBoard() {
@@ -469,7 +383,6 @@
                 for (let c = 0; c < BOARD_SIZE; c++) {
                     const cell = boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`);
                     if (cell.classList.contains('exploding')) continue;
-
                     cell.className = 'cell';
                     if (grid[r][c]) {
                         cell.classList.add('filled');
@@ -483,16 +396,9 @@
 
         function getSmartPieceTemplate(index, forceEmergency = false) {
             if (forceEmergency) return emergencyPiece;
-            
-            // Si c'est le début de la partie, on impose deux 3x3 et un 3x2
             if (isFirstRound) {
-                if (index === 0 || index === 1) {
-                    return block3x3;
-                } else {
-                    return block3x2;
-                }
+                return (index === 0 || index === 1) ? block3x3 : block3x2;
             }
-
             const shuffled = [...pieceTemplates].sort(() => Math.random() - 0.5);
             return shuffled[0];
         }
@@ -574,7 +480,6 @@
 
                 setupDragAndDrop(pieceElement, shape, i);
             }
-            // Une fois la distribution initiale faite, on désactive la règle des blocs géants
             isFirstRound = false;
         }
 
@@ -597,7 +502,6 @@
                 
                 startTouchX = clientX;
                 startTouchY = clientY;
-
                 offsetTouchY = e.touches ? 75 : 0; 
 
                 pieceEl.classList.add('dragging');
@@ -613,8 +517,6 @@
                 pieceEl.style.gridTemplateRows = `repeat(${rows}, 44px)`;
                 pieceEl.style.gridTemplateColumns = `repeat(${cols}, 44px)`;
 
-                // ALIGNEMENT GÉOMÉTRIQUE ABSOLU ET SYNC DE L'OMBRE :
-                // On détecte la cellule physique la plus proche du doigt pour en faire notre ancre
                 const subCells = pieceEl.querySelectorAll('.piece-cell');
                 let closestSubCell = subCells[0];
                 let minSubDist = Infinity;
@@ -630,11 +532,9 @@
                     }
                 });
 
-                // On extrait précisément le décalage relatif de cette cellule pour l'aimantage futur
                 dragOffsetRow = parseInt(closestSubCell.dataset.relRow);
                 dragOffsetCol = parseInt(closestSubCell.dataset.relCol);
 
-                // Calcule le recentrage pour coller le doigt parfaitement sur ce bloc
                 const targetRect = closestSubCell.getBoundingClientRect();
                 const subCenterX = targetRect.left + (targetRect.width / 2);
                 const subCenterY = targetRect.top + (targetRect.height / 2);
@@ -657,7 +557,6 @@
 
                 pieceEl.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
                 
-                // Pour l'aimantage, on cible l'ancre physique qui correspond exactement au bloc sélectionné sous le doigt
                 const activeAncreCell = pieceEl.querySelector(`[data-rel-row='${dragOffsetRow}'][data-rel-col='${dragOffsetCol}']`);
                 if (activeAncreCell) {
                     const rect = activeAncreCell.getBoundingClientRect();
@@ -669,7 +568,6 @@
 
                 const targetCell = getCellUnderPoint(lastPointerX, lastPointerY);
                 if (targetCell) {
-                    // On calcule la ligne et colonne de départ virtuelles de la pièce entière (le coin [0,0])
                     const startR = parseInt(targetCell.dataset.row) - dragOffsetRow;
                     const startC = parseInt(targetCell.dataset.col) - dragOffsetCol;
                     if (canPlacePiece(shape, startR, startC)) {
@@ -700,14 +598,15 @@
                         pieceEl.parentElement.innerHTML = ''; 
                         activePieces.find(p => p.id === id).placed = true;
 
+                        // RÈGLE FIDÈLE : Ajout de 1 point par bloc physique posé
+                        score += shape.length; 
+                        scoreElement.innerText = score;
+
                         playSynthSound(550, 'sine', 0.08);
                         updateBoardUI();
                         checkLines();
                         
-                        // Si on a terminé toute la parcelle (les 3 blocs)
                         if (activePieces.every(p => p.placed)) {
-                            comboCount++; // Le combo n'augmente que lorsqu'on vide la parcelle
-                            showComboUI();
                             generateNewRound();
                         } else {
                             checkGameOver();
@@ -717,7 +616,6 @@
 
                 if (!placedSuccessfully) {
                     playSynthSound(120, 'sawtooth', 0.1);
-                    
                     pieceEl.classList.remove('dragging');
                     pieceEl.style.transform = 'translate3d(0, 0, 0)'; 
 
@@ -727,9 +625,7 @@
                     pieceEl.style.gridTemplateColumns = `repeat(${cols}, 20px)`;
 
                     pieceEl.querySelectorAll('.piece-cell').forEach(c => {
-                        c.style.width = '';
-                        c.style.height = '';
-                        c.style.borderRadius = '';
+                        c.style.width = ''; c.style.height = ''; c.style.borderRadius = '';
                     });
                 }
             };
@@ -737,7 +633,6 @@
             pieceEl.addEventListener('mousedown', onStart);
             window.addEventListener('mousemove', onMove);
             window.addEventListener('mouseup', onEnd);
-
             pieceEl.addEventListener('touchstart', onStart, { passive: false });
             window.addEventListener('touchmove', onMove, { passive: false });
             window.addEventListener('touchend', onEnd);
@@ -747,39 +642,28 @@
             const cells = document.querySelectorAll('.cell');
             let nearestCell = null;
             let minDistance = 24; 
-
             for (let cell of cells) {
                 const rect = cell.getBoundingClientRect();
                 const cellCenterX = rect.left + rect.width / 2;
                 const cellCenterY = rect.top + rect.height / 2;
-                
                 const dist = Math.hypot(x - cellCenterX, y - cellCenterY);
-                if (dist < minDistance) {
-                    minDistance = dist;
-                    nearestCell = cell;
-                }
+                if (dist < minDistance) { minDistance = dist; nearestCell = cell; }
             }
             return nearestCell;
         }
 
         function showPreview(shape, startR, startC) {
             shape.forEach(block => {
-                const r = startR + block[0];
-                const c = startC + block[1];
+                const r = startR + block[0]; const c = startC + block[1];
                 const cell = boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`);
-                if (cell) {
-                    cell.classList.add('preview');
-                    cell.style.backgroundColor = currentColor;
-                }
+                if (cell) { cell.classList.add('preview'); cell.style.backgroundColor = currentColor; }
             });
         }
 
         function clearPreview() {
             document.querySelectorAll('.cell.preview').forEach(cell => {
                 cell.classList.remove('preview');
-                if (!cell.classList.contains('filled')) {
-                    cell.style.backgroundColor = '';
-                }
+                if (!cell.classList.contains('filled')) { cell.style.backgroundColor = ''; }
             });
         }
 
@@ -788,68 +672,73 @@
             let colsToClear = [];
 
             for (let r = 0; r < BOARD_SIZE; r++) {
-                if (grid[r].every(cell => cell !== null)) {
-                    rowsToClear.push(r);
-                }
+                if (grid[r].every(cell => cell !== null)) rowsToClear.push(r);
             }
-
             for (let c = 0; c < BOARD_SIZE; c++) {
                 let columnFull = true;
                 for (let r = 0; r < BOARD_SIZE; r++) {
-                    if (grid[r][c] === null) {
-                        columnFull = false;
-                        break;
-                    }
+                    if (grid[r][c] === null) { columnFull = false; break; }
                 }
-                if (columnFull) {
-                    colsToClear.push(c);
-                }
+                if (columnFull) colsToClear.push(c);
             }
 
             const linesCount = rowsToClear.length + colsToClear.length;
 
             if (linesCount > 0) {
+                comboCount++; // Augmente le multiplicateur si on enchaîne des lignes
+                showComboUI();
+
                 rowsToClear.forEach(r => {
                     for (let c = 0; c < BOARD_SIZE; c++) {
-                        const cell = boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`);
-                        cell.classList.add('exploding');
+                        boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`).classList.add('exploding');
                     }
                 });
                 colsToClear.forEach(c => {
                     for (let r = 0; r < BOARD_SIZE; r++) {
-                        const cell = boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`);
-                        cell.classList.add('exploding');
+                        boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`).classList.add('exploding');
                     }
                 });
 
                 playSynthSound(700, 'triangle', 0.3);
 
-                rowsToClear.forEach(r => {
-                    for (let c = 0; c < BOARD_SIZE; c++) grid[r][c] = null;
-                });
-                colsToClear.forEach(c => {
-                    for (let r = 0; r < BOARD_SIZE; r++) grid[r][c] = null;
-                });
+                rowsToClear.forEach(r => { for (let c = 0; c < BOARD_SIZE; c++) grid[r][c] = null; });
+                colsToClear.forEach(c => { for (let r = 0; r < BOARD_SIZE; r++) grid[r][c] = null; });
 
                 setTimeout(() => {
                     document.querySelectorAll('.cell.exploding').forEach(cell => {
                         cell.classList.remove('exploding', 'filled');
                         cell.style.backgroundColor = '';
                     });
+                    
+                    // RÈGLE FIDÈLE : Si la parcelle de 8x8 entière est nettoyée de tous ses blocs !
+                    let isBoardTotallyEmpty = true;
+                    for (let r = 0; r < BOARD_SIZE; r++) {
+                        for (let c = 0; c < BOARD_SIZE; c++) {
+                            if (grid[r][c] !== null) { isBoardTotallyEmpty = false; break; }
+                        }
+                    }
+                    
+                    if (isBoardTotallyEmpty) {
+                        score += 5000; // Bonus majeur All Clear de la parcelle
+                        playSynthSound(900, 'sine', 0.5);
+                    }
+
                     updateBoardUI();
                     checkGameOver();
                 }, 250);
 
-                // Une ligne = 1000 points. Applique le multiplicateur de combo s'il y en a un de validé
+                // Une ligne = 1000 points * le nombre de lignes * le combo actif
                 let calculatedScore = 1000 * linesCount * comboCount;
                 score += calculatedScore;
                 scoreElement.innerText = score;
 
                 if (score > bestScore) {
-                    bestScore = score;
-                    bestScoreElement.innerText = bestScore;
+                    bestScore = score; bestScoreElement.innerText = bestScore;
                     localStorage.setItem('block_blast_best', bestScore);
                 }
+            } else {
+                comboCount = 0; // Reset si aucun bloc n'est éliminé ce coup-ci
+                hideComboUI();
             }
         }
 
@@ -857,24 +746,19 @@
             if (comboCount > 1) {
                 comboBadge.innerText = `COMBO x${comboCount}`;
                 comboBadge.classList.add('active');
+            } else {
+                hideComboUI();
             }
         }
 
-        function hideComboUI() {
-            comboBadge.classList.remove('active');
-        }
+        function hideComboUI() { comboBadge.classList.remove('active'); }
 
         function checkGameOver() {
             const unplacedPieces = activePieces.filter(p => !p.placed);
             let atLeastOneCanFit = false;
-
             for (let piece of unplacedPieces) {
-                if (canPieceFitSomewhere(piece.shape)) {
-                    atLeastOneCanFit = true;
-                    break;
-                }
+                if (canPieceFitSomewhere(piece.shape)) { atLeastOneCanFit = true; break; }
             }
-
             if (!atLeastOneCanFit && unplacedPieces.length > 0) {
                 playSynthSound(100, 'sawtooth', 0.6);
                 resetGame();
@@ -882,39 +766,25 @@
         }
 
         function resetGame() {
-            score = 0;
-            comboCount = 0;
-            isFirstRound = true;
-            scoreElement.innerText = score;
-            hideComboUI();
+            score = 0; comboCount = 0; isFirstRound = true;
+            scoreElement.innerText = score; hideComboUI();
             grid = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
-            updateBoardUI();
-            generateNewRound();
+            updateBoardUI(); generateNewRound();
         }
 
-        // --- PARAMÈTRES ---
         document.getElementById('openSettings').addEventListener('click', () => modal.style.display = 'flex');
         document.getElementById('closeSettings').addEventListener('click', () => modal.style.display = 'none');
-        document.getElementById('quitGame').addEventListener('click', () => {
-            resetGame();
-            modal.style.display = 'none';
-        });
+        document.getElementById('quitGame').addEventListener('click', () => { resetGame(); modal.style.display = 'none'; });
 
         colorPicker.addEventListener('input', (e) => {
             const hexColor = e.target.value.toUpperCase();
-            colorValueText.innerText = hexColor;
-            currentColor = hexColor;
+            colorValueText.innerText = hexColor; currentColor = hexColor;
             document.documentElement.style.setProperty('--primary-color', hexColor);
-            
-            document.querySelectorAll('.piece-cell').forEach(c => {
-                c.style.backgroundColor = hexColor;
-            });
+            document.querySelectorAll('.piece-cell').forEach(c => c.style.backgroundColor = hexColor);
             updateBoardUI();
         });
 
-        document.getElementById('volumeSlider').addEventListener('input', (e) => {
-            soundVolume = e.target.value / 100;
-        });
+        document.getElementById('volumeSlider').addEventListener('input', (e) => { soundVolume = e.target.value / 100; });
 
         createBoard();
         generateNewRound();
