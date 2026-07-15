@@ -533,12 +533,18 @@
                 const pieceMatrix = Array(rows).fill(null).map(() => Array(cols).fill(0));
                 shape.forEach(b => pieceMatrix[b[0]][b[1]] = 1);
 
-                pieceMatrix.forEach(row => {
-                    row.forEach(val => {
+                // On stocke l'emplacement réel de chaque bloc physique pour les retrouver facilement
+                let cellId = 0;
+                pieceMatrix.forEach((row, r) => {
+                    row.forEach((val, c) => {
                         const cell = document.createElement('div');
                         if (val === 1) {
                             cell.classList.add('piece-cell');
                             cell.style.backgroundColor = currentColor;
+                            // Associe les coordonnées logiques relatives de la matrice
+                            cell.dataset.relRow = r;
+                            cell.dataset.relCol = c;
+                            cellId++;
                         } else {
                             cell.style.background = 'transparent';
                             cell.style.border = 'none';
@@ -568,6 +574,9 @@
             let isDragging = false;
             let offsetTouchY = 0;
             let lastPointerX = 0, lastPointerY = 0;
+            
+            let targetCellOffsetRow = 0;
+            let targetCellOffsetCol = 0;
 
             const onStart = (e) => {
                 e.preventDefault();
@@ -579,12 +588,10 @@
                 startTouchX = clientX;
                 startTouchY = clientY;
 
-                // Décale verticalement sur mobile pour que le doigt ne cache pas la pièce
                 offsetTouchY = e.touches ? 75 : 0; 
 
                 pieceEl.classList.add('dragging');
                 
-                // Redimensionnement à la taille du plateau (44px + 2px de gap)
                 pieceEl.querySelectorAll('.piece-cell').forEach(c => {
                     c.style.width = '44px';
                     c.style.height = '44px';
@@ -595,6 +602,40 @@
                 const cols = Math.max(...shape.map(b => b[1])) + 1;
                 pieceEl.style.gridTemplateRows = `repeat(${rows}, 44px)`;
                 pieceEl.style.gridTemplateColumns = `repeat(${cols}, 44px)`;
+
+                // RECENTRAAGE PARFAIT ET STABLE :
+                // On détecte quel sous-bloc physique précis de la pièce est le plus proche de notre point de contact initial
+                const subCells = pieceEl.querySelectorAll('.piece-cell');
+                let closestSubCell = subCells[0];
+                let minSubDist = Infinity;
+
+                subCells.forEach(sub => {
+                    const r = sub.getBoundingClientRect();
+                    const centerX = r.left + r.width / 2;
+                    const centerY = r.top + r.height / 2;
+                    const dist = Math.hypot(clientX - centerX, clientY - centerY);
+                    if (dist < minSubDist) {
+                        minSubDist = dist;
+                        closestSubCell = sub;
+                    }
+                });
+
+                // On stocke le décalage de coordonnées logiques (ex: [1, 0]) du bloc sélectionné
+                // pour corriger la preview logicielle lors de l'aimantage
+                targetCellOffsetRow = parseInt(closestSubCell.dataset.relRow);
+                targetCellOffsetCol = parseInt(closestSubCell.dataset.relCol);
+
+                // On applique une translation pour que le centre géométrique de ce bloc précis se place pile sous notre curseur
+                const targetRect = closestSubCell.getBoundingClientRect();
+                const currentSubCenterGlobalX = targetRect.left + (targetRect.width / 2);
+                const currentSubCenterGlobalY = targetRect.top + (targetRect.height / 2);
+
+                const correctionX = currentSubCenterGlobalX - clientX;
+                const correctionY = currentSubCenterGlobalY - clientY;
+
+                // Application du point d'origine corrigé
+                startTouchX += correctionX;
+                startTouchY += correctionY;
 
                 playSynthSound(400, 'sine', 0.05);
                 onMove(e);
@@ -611,17 +652,13 @@
 
                 pieceEl.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
                 
-                // CORRECTION SÉCURITÉ : On base la recherche de la case cible sur le premier bloc actif [0, 0] de la pièce, 
-                // et non plus sur le centre générique de la boîte englobante.
-                const firstCell = pieceEl.querySelector('.piece-cell');
-                if (firstCell) {
-                    const cellRect = firstCell.getBoundingClientRect();
-                    lastPointerX = cellRect.left + (cellRect.width / 2);
-                    lastPointerY = cellRect.top + (cellRect.height / 2);
-                } else {
-                    const dragRect = pieceEl.getBoundingClientRect();
-                    lastPointerX = dragRect.left + 22;
-                    lastPointerY = dragRect.top + 22;
+                // On aligne précisément l'aimantage sur la position physique de la première cellule logique de la pièce [0,0]
+                // en cherchant la cellule DOM qui possède l'attribut relRow="0" et relCol="0" (ou le premier disponible)
+                const originCell = pieceEl.querySelector(`[data-rel-row='0'][data-rel-col='0']`) || pieceEl.querySelector('.piece-cell');
+                if (originCell) {
+                    const rect = originCell.getBoundingClientRect();
+                    lastPointerX = rect.left + (rect.width / 2);
+                    lastPointerY = rect.top + (rect.height / 2);
                 }
 
                 clearPreview();
@@ -701,7 +738,7 @@
         function getCellUnderPoint(x, y) {
             const cells = document.querySelectorAll('.cell');
             let nearestCell = null;
-            let minDistance = 30; // Zone d'aimantage resserrée et plus précise
+            let minDistance = 24; // Aimantage précis pour une transition fluide et intuitive
 
             for (let cell of cells) {
                 const rect = cell.getBoundingClientRect();
