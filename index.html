@@ -65,7 +65,6 @@
             opacity: 0;
             transform: scale(0.8);
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
         }
 
         .combo-badge.active {
@@ -76,7 +75,7 @@
 
         @keyframes pulse {
             0% { transform: scale(1); }
-            100% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 0, 127, 0.35); }
+            100% { transform: scale(1.05); }
         }
 
         .best-score {
@@ -132,8 +131,7 @@
             background-color: var(--grid-bg);
             padding: 14px;
             border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 
-                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.02);
             position: relative;
         }
@@ -147,13 +145,11 @@
             transition: background-color 0.15s, transform 0.15s;
             position: relative;
             overflow: hidden;
-            box-shadow: inset 0 -2px 3px rgba(0,0,0,0.3);
         }
 
+        /* SUPPRESSION DU GLOW : Couleur unie et aplat moderne */
         .cell.filled {
-            background: linear-gradient(135deg, var(--primary-color), #36b0a8);
-            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4), 
-                        0 4px 10px rgba(78, 205, 196, 0.3);
+            background-color: var(--primary-color);
             border: 1px solid rgba(0, 0, 0, 0.15);
         }
 
@@ -162,7 +158,6 @@
             0% {
                 transform: scale(1);
                 background: #ffffff !important;
-                box-shadow: 0 0 20px #ffffff;
                 opacity: 1;
             }
             100% {
@@ -180,7 +175,6 @@
         .cell.preview {
             opacity: 0.35;
             background: var(--primary-color);
-            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
         }
 
         /* Zone de sélection des pièces */
@@ -224,14 +218,13 @@
             pointer-events: none;
         }
 
+        /* SUPPRESSION DU GLOW DES PIÈCES */
         .piece-cell {
             width: 22px;
             height: 22px;
             border-radius: 6px;
             box-sizing: border-box;
-            background: linear-gradient(135deg, var(--primary-color), #36b0a8);
-            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3), 
-                        0 2px 4px rgba(0, 0, 0, 0.2);
+            background-color: var(--primary-color);
             border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
@@ -303,7 +296,6 @@
             border-radius: 50%;
             background: var(--primary-color);
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
             transition: transform 0.1s;
         }
 
@@ -332,7 +324,6 @@
         .color-picker-input::-webkit-color-swatch {
             border-radius: 12px;
             border: 2px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         .color-value-text {
@@ -361,12 +352,10 @@
         .btn-close {
             background: var(--primary-color);
             color: #08080c;
-            box-shadow: 0 6px 15px rgba(78, 205, 196, 0.25);
         }
 
         .btn-close:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
         }
 
         .btn-quit {
@@ -431,6 +420,7 @@
 
         let score = 0;
         let comboCount = 0;
+        let baseLinePoints = 3500; // Base de points initiale demandée
         let bestScore = localStorage.getItem('block_blast_best') || 0;
         bestScoreElement.innerText = bestScore;
 
@@ -506,6 +496,9 @@
                     cell.className = 'cell';
                     if (grid[r][c]) {
                         cell.classList.add('filled');
+                        cell.style.backgroundColor = currentColor;
+                    } else {
+                        cell.style.backgroundColor = '';
                     }
                 }
             }
@@ -571,6 +564,7 @@
                         const cell = document.createElement('div');
                         if (val === 1) {
                             cell.classList.add('piece-cell');
+                            cell.style.backgroundColor = currentColor;
                         } else {
                             cell.style.background = 'transparent';
                             cell.style.border = 'none';
@@ -614,6 +608,7 @@
 
                 pieceEl.classList.add('dragging');
                 
+                // Correction d'affichage : redimensionnement précis des pièces lors du glisser-déposer
                 pieceEl.querySelectorAll('.piece-cell').forEach(c => {
                     c.style.width = '44px';
                     c.style.height = '44px';
@@ -743,6 +738,7 @@
                 const cell = boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`);
                 if (cell) {
                     cell.classList.add('preview');
+                    cell.style.backgroundColor = currentColor;
                 }
             });
         }
@@ -750,6 +746,9 @@
         function clearPreview() {
             document.querySelectorAll('.cell.preview').forEach(cell => {
                 cell.classList.remove('preview');
+                if (!cell.classList.contains('filled')) {
+                    cell.style.backgroundColor = '';
+                }
             });
         }
 
@@ -782,7 +781,7 @@
                 comboCount++;
                 showComboUI();
 
-                // 1. Ajouter l'effet visuel de l'explosion
+                // 1. Appliquer l'animation d'explosion
                 rowsToClear.forEach(r => {
                     for (let c = 0; c < BOARD_SIZE; c++) {
                         const cell = boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`);
@@ -798,7 +797,7 @@
 
                 playSynthSound(700 + (comboCount * 100), 'triangle', 0.3);
 
-                // 2. Vider instantanément la grille logique pour éliminer les bugs de cases persistantes
+                // 2. Vider instantanément la grille logique
                 rowsToClear.forEach(r => {
                     for (let c = 0; c < BOARD_SIZE; c++) grid[r][c] = null;
                 });
@@ -806,18 +805,23 @@
                     for (let r = 0; r < BOARD_SIZE; r++) grid[r][c] = null;
                 });
 
-                // 3. Nettoyage et vérification de fin de jeu après la fin de l'animation
+                // 3. Nettoyage et fin d'animation
                 setTimeout(() => {
                     document.querySelectorAll('.cell.exploding').forEach(cell => {
                         cell.classList.remove('exploding', 'filled');
+                        cell.style.backgroundColor = '';
                     });
                     updateBoardUI();
                     checkGameOver();
                 }, 300);
 
-                const basePoints = linesCount * 150 + (linesCount - 1) * 50;
-                score += basePoints * comboCount;
+                // 4. Calcul des points (Nouveau système : 3500 points + 20% d'augmentation à chaque fois)
+                let calculatedScore = Math.round(baseLinePoints * linesCount * comboCount);
+                score += calculatedScore;
                 scoreElement.innerText = score;
+
+                // Augmente la valeur de base de 20% pour la prochaine ligne complétée
+                baseLinePoints = Math.round(baseLinePoints * 1.20);
 
                 if (score > bestScore) {
                     bestScore = score;
@@ -861,6 +865,7 @@
         function resetGame() {
             score = 0;
             comboCount = 0;
+            baseLinePoints = 3500; // Réinitialise aussi la base de score
             scoreElement.innerText = score;
             hideComboUI();
             grid = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
@@ -881,6 +886,11 @@
             colorValueText.innerText = hexColor;
             currentColor = hexColor;
             document.documentElement.style.setProperty('--primary-color', hexColor);
+            
+            // Met à jour les pièces de la réserve
+            document.querySelectorAll('.piece-cell').forEach(c => {
+                c.style.backgroundColor = hexColor;
+            });
             updateBoardUI();
         });
 
