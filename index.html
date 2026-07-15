@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Fidèle Block Blast Clone</title>
+    <title>Block Blast - Version Stable</title>
     <style>
         :root {
-            --bg-color: #08080c;
-            --grid-bg: #111116;
-            --cell-empty: #1a1a23;
+            --bg-color: #121216;
+            --grid-bg: #1e1e24;
+            --cell-empty: #2d2d38;
             --primary-color: #4ecdc4;
-            --combo-color: #ff007f;
         }
 
         body {
@@ -18,7 +17,7 @@
             padding: 0;
             background-color: var(--bg-color);
             color: white;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -28,154 +27,111 @@
             touch-action: none;
         }
 
+        /* Score en haut */
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            position: relative;
             width: 100%;
             max-width: 360px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            position: relative;
+        }
+
+        .score-title {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #8a8a9e;
+            margin: 0;
         }
 
         .score-value {
-            font-size: 3.8rem;
-            font-weight: 900;
-            margin: 0;
-            color: #ffffff;
-            letter-spacing: -1px;
-            text-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
-            line-height: 1;
-        }
-
-        .combo-badge {
-            font-size: 1rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--combo-color);
-            background: rgba(255, 0, 127, 0.1);
-            border: 1px solid rgba(255, 0, 127, 0.25);
-            padding: 4px 12px;
-            border-radius: 20px;
-            min-height: 18px;
-            opacity: 0;
-            transform: scale(0.8);
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .combo-badge.active {
-            opacity: 1;
-            transform: scale(1);
-            animation: pulse 1s infinite alternate;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.05); }
+            font-size: 3.2rem;
+            font-weight: bold;
+            margin: 2px 0;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
         }
 
         .best-score {
             font-size: 0.85rem;
-            color: #62627a;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            margin-top: 2px;
-        }
-
-        .best-score span {
             color: var(--primary-color);
+            margin: 0;
         }
 
+        /* Bouton Engrenage */
         .settings-btn {
             position: absolute;
-            top: 5px;
-            right: 15px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 2rem;
             cursor: pointer;
             color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
+            transition: transform 0.3s ease;
             z-index: 10;
         }
 
+        .settings-btn:hover {
+            transform: rotate(45deg);
+        }
+
+        /* Zone de Jeu */
         .game-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 25px;
+            position: relative;
         }
 
         .board {
             display: grid;
-            grid-template-columns: repeat(8, 44px);
-            grid-template-rows: repeat(8, 44px);
+            grid-template-columns: repeat(8, 42px);
+            grid-template-rows: repeat(8, 42px);
             gap: 4px;
             background-color: var(--grid-bg);
-            padding: 14px;
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.02);
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
             position: relative;
         }
 
         .cell {
-            width: 44px;
-            height: 44px;
+            width: 42px;
+            height: 42px;
             background-color: var(--cell-empty);
-            border-radius: 10px;
+            border-radius: 6px;
+            transition: background-color 0.1s, opacity 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            user-select: none;
             box-sizing: border-box;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cell.filled {
-            background-color: var(--primary-color);
-            border: 1px solid rgba(0, 0, 0, 0.15);
-        }
-
-        @keyframes block-pop {
-            0% { transform: scale(1); background: #ffffff !important; opacity: 1; }
-            100% { transform: scale(0); background: #ffffff !important; opacity: 0; }
-        }
-
-        .cell.exploding {
-            animation: block-pop 0.25s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
-            z-index: 10;
         }
 
         .cell.preview {
-            opacity: 0.35;
-            background-color: var(--primary-color);
+            opacity: 0.6;
         }
 
+        /* Pièces en bas */
         .pieces-pool {
             display: flex;
             justify-content: space-around;
             align-items: center;
             width: 100%;
-            max-width: 380px;
-            height: 140px;
-            background: rgba(17, 17, 22, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.03);
+            max-width: 360px;
+            height: 120px;
+            background: rgba(0,0,0,0.3);
             padding: 10px;
-            border-radius: 24px;
+            border-radius: 15px;
             box-sizing: border-box;
-            backdrop-filter: blur(10px);
         }
 
         .piece-container {
-            width: 110px;
-            height: 110px;
+            width: 100px;
+            height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -189,7 +145,7 @@
             position: absolute;
             user-select: none;
             touch-action: none;
-            will-change: transform;
+            transition: none; /* Désactive les transitions CSS pendant le drag */
         }
 
         .piece.dragging {
@@ -199,14 +155,18 @@
         }
 
         .piece-cell {
-            width: 20px;
-            height: 20px;
-            border-radius: 5px;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            box-shadow: inset 0 0 5px rgba(255,255,255,0.3);
             box-sizing: border-box;
-            background-color: var(--primary-color);
-            border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
+        /* Menu Paramètres (Modal) */
         .modal {
             display: none;
             position: fixed;
@@ -214,63 +174,81 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(5, 5, 8, 0.85);
+            background: rgba(0, 0, 0, 0.85);
             z-index: 2000;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(12px);
         }
 
         .modal-content {
-            background: #111116;
+            background: #1e1e24;
             padding: 30px;
-            border-radius: 28px;
+            border-radius: 20px;
             width: 85%;
             max-width: 320px;
-            box-shadow: 0 30px 70px rgba(0,0,0,0.8);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            text-align: center;
+            border: 1px solid #333;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        .setting-row {
+            margin: 20px 0;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            align-items: flex-start;
+            gap: 8px;
         }
 
-        .modal-content h3 { margin: 0; font-size: 1.4rem; text-align: center; font-weight: 800; }
-        .setting-row { display: flex; flex-direction: column; gap: 10px; }
-        .setting-row label { font-size: 0.8rem; color: #62627a; text-transform: uppercase; font-weight: 700; }
-        
-        input[type="range"] {
-            -webkit-appearance: none;
+        .setting-row label {
+            font-size: 0.9rem;
+            color: #8a8a9e;
+            font-weight: bold;
+        }
+
+        .setting-row select, .setting-row input[type="range"] {
             width: 100%;
-            height: 6px;
-            background: #1a1a23;
-            border-radius: 3px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #121216;
+            color: white;
+            border: 1px solid #3a3a4c;
             outline: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            cursor: pointer;
+            box-sizing: border-box;
         }
 
-        .color-picker-wrapper { display: flex; align-items: center; gap: 15px; }
-        .color-picker-input { -webkit-appearance: none; appearance: none; width: 45px; height: 45px; background: none; border: none; cursor: pointer; padding: 0; }
-        .color-picker-input::-webkit-color-swatch { border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.1); }
-        .color-value-text { font-family: monospace; background: #08080c; padding: 12px; border-radius: 10px; flex-grow: 1; text-align: center; font-weight: bold; color: #a0a0ba; }
-        
-        .btn-block { width: 100%; padding: 14px; border: none; border-radius: 16px; font-weight: 800; font-size: 0.95rem; cursor: pointer; }
-        .btn-close { background: var(--primary-color); color: #08080c; }
-        .btn-quit { background: transparent; color: #ff5e7e; border: 1px solid rgba(255, 94, 126, 0.15); margin-top: -5px; }
+        .btn-block {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-block:hover {
+            opacity: 0.9;
+        }
+
+        .btn-close { background: var(--primary-color); color: #121216; }
+        .btn-quit { background: #ff6b6b; color: white; }
     </style>
 </head>
 <body>
 
     <div class="header">
+        <p class="score-title">Score</p>
         <div class="score-value" id="score">0</div>
-        <div class="combo-badge" id="comboBadge">x1</div>
-        <div class="best-score">MEILLEUR : <span id="best-score">0</span></div>
+        <p class="best-score">Meilleur : <span id="best-score">0</span></p>
         <button class="settings-btn" id="openSettings">⚙️</button>
     </div>
 
@@ -281,20 +259,38 @@
 
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h3>PARAMÈTRES</h3>
+            <h3>⚙️ OPTIONS</h3>
+            
             <div class="setting-row">
-                <label>Sons</label>
+                <label>🔊 Effets Sonores</label>
                 <input type="range" id="volumeSlider" min="0" max="100" value="70">
             </div>
+
             <div class="setting-row">
-                <label>Thème Couleur</label>
-                <div class="color-picker-wrapper">
-                    <input type="color" id="colorPicker" class="color-picker-input" value="#4ecdc4">
-                    <div class="color-value-text" id="colorValueText">#4ECDC4</div>
-                </div>
+                <label>🎨 Couleur des blocs</label>
+                <select id="colorSelect">
+                    <option value="#ff6b6b">Rouge Corail</option>
+                    <option value="#4ecdc4" selected>Turquoise</option>
+                    <option value="#ffbe0b">Jaune Étoile</option>
+                    <option value="#9b5de5">Violet Royal</option>
+                    <option value="#3a86c8">Bleu Océan</option>
+                </select>
             </div>
-            <button class="btn-block btn-close" id="closeSettings">Fermer</button>
-            <button class="btn-block btn-quit" id="quitGame">Réinitialiser</button>
+
+            <div class="setting-row">
+                <label>📷 Style des blocs (Image/Émoji)</label>
+                <select id="imageSelect">
+                    <option value="">Uni (Sans icône)</option>
+                    <option value="💎" selected>💎 Diamant</option>
+                    <option value="⭐">⭐ Étoile</option>
+                    <option value="🐱">🐱 Chat</option>
+                    <option value="🐶">🐶 Chien</option>
+                    <option value="🔥">🔥 Feu</option>
+                </select>
+            </div>
+
+            <button class="btn-block btn-close" id="closeSettings">▶️ Reprendre</button>
+            <button class="btn-block btn-quit" id="quitGame">❌ Réinitialiser</button>
         </div>
     </div>
 
@@ -304,20 +300,17 @@
         const piecesPoolElement = document.getElementById('piecesPool');
         const scoreElement = document.getElementById('score');
         const bestScoreElement = document.getElementById('best-score');
-        const comboBadge = document.getElementById('comboBadge');
         const modal = document.getElementById('settingsModal');
-        const colorPicker = document.getElementById('colorPicker');
-        const colorValueText = document.getElementById('colorValueText');
 
         let score = 0;
-        let comboCount = 0;
-        let isFirstRound = true; 
         let bestScore = localStorage.getItem('block_blast_best') || 0;
         bestScoreElement.innerText = bestScore;
 
         let grid = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
         let activePieces = [];
+        
         let currentColor = '#4ecdc4';
+        let currentEmoji = '💎';
         let soundVolume = 0.7;
 
         function playSynthSound(freq, type, duration) {
@@ -328,7 +321,7 @@
                 const gain = ctx.createGain();
                 osc.type = type;
                 osc.frequency.value = freq;
-                gain.gain.setValueAtTime(soundVolume * 0.05, ctx.currentTime);
+                gain.gain.setValueAtTime(soundVolume * 0.1, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + duration);
                 osc.connect(gain);
                 gain.connect(ctx.destination);
@@ -338,32 +331,16 @@
         }
 
         const pieceTemplates = [
+            [[0,0]], 
             [[0,0], [0,1]], 
             [[0,0], [1,0]], 
             [[0,0], [0,1], [0,2]], 
             [[0,0], [1,0], [2,0]], 
-            [[0,0], [0,1], [0,2], [0,3]], 
-            [[0,0], [1,0], [2,0], [3,0]], 
-            [[0,0], [0,1], [0,2], [0,3], [0,4]], 
-            [[0,0], [1,0], [2,0], [3,0], [4,0]], 
             [[0,0], [0,1], [1,0], [1,1]], 
             [[0,0], [1,0], [1,1]], 
-            [[0,1], [1,1], [1,0]], 
-            [[0,0], [0,1], [1,0]], 
-            [[0,0], [1,0], [2,0], [2,1]], 
-            [[0,1], [1,1], [2,1], [2,0]], 
             [[0,0], [0,1], [0,2], [1,1]], 
-            [[0,1], [1,0], [1,1], [2,1]], 
-            [[0,1], [1,0], [1,1], [1,2], [2,1]], 
-            [[0,1], [0,2], [1,0], [1,1]], 
-            [[0,0], [0,1], [1,1], [1,2]], 
-            [[0,0], [1,0], [1,1], [2,1]],
-            [[0,0]] 
+            [[0,1], [1,0], [1,1], [1,2]], 
         ];
-
-        const block3x3 = [[0,0], [0,1], [0,2], [1,0], [1,1], [1,2], [2,0], [2,1], [2,2]];
-        const block3x2 = [[0,0], [0,1], [1,0], [1,1], [2,0], [2,1]];
-        const emergencyPiece = [[0,0]];
 
         function createBoard() {
             boardElement.innerHTML = '';
@@ -382,38 +359,40 @@
             for (let r = 0; r < BOARD_SIZE; r++) {
                 for (let c = 0; c < BOARD_SIZE; c++) {
                     const cell = boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`);
-                    if (cell.classList.contains('exploding')) continue;
-                    cell.className = 'cell';
                     if (grid[r][c]) {
-                        cell.classList.add('filled');
-                        cell.style.backgroundColor = currentColor;
+                        cell.style.backgroundColor = grid[r][c].color;
+                        cell.innerText = grid[r][c].emoji;
                     } else {
                         cell.style.backgroundColor = '';
+                        cell.innerText = '';
                     }
                 }
             }
         }
 
-        function getSmartPieceTemplate(index, forceEmergency = false) {
-            if (forceEmergency) return emergencyPiece;
-            if (isFirstRound) {
-                return (index === 0 || index === 1) ? block3x3 : block3x2;
+        function getValidPieceTemplate() {
+            const shuffledTemplates = [...pieceTemplates].sort(() => Math.random() - 0.5);
+            for (let template of shuffledTemplates) {
+                if (canPieceFitSomewhere(template)) {
+                    return template;
+                }
             }
-            const shuffled = [...pieceTemplates].sort(() => Math.random() - 0.5);
-            return shuffled[0];
+            return [[0,0]]; 
         }
 
-        function canPieceFitSomewhere(shape) {
+        function canPieceFitSomewhere(template) {
             for (let r = 0; r < BOARD_SIZE; r++) {
                 for (let c = 0; c < BOARD_SIZE; c++) {
-                    if (canPlacePiece(shape, r, c)) return true;
+                    if (canPlacePiece(template, r, c)) {
+                        return true;
+                    }
                 }
             }
             return false;
         }
 
-        function canPlacePiece(shape, startRow, startCol) {
-            for (let block of shape) {
+        function canPlacePiece(template, startRow, startCol) {
+            for (let block of template) {
                 const r = startRow + block[0];
                 const c = startCol + block[1];
                 if (r < 0 || r >= BOARD_SIZE || c < 0 || c >= BOARD_SIZE || grid[r][c] !== null) {
@@ -426,8 +405,7 @@
         function generateNewRound() {
             piecesPoolElement.innerHTML = '';
             activePieces = [];
-            let currentBoardAllowsPlacing = false;
-            
+
             for (let i = 0; i < 3; i++) {
                 const container = document.createElement('div');
                 container.classList.add('piece-container');
@@ -436,33 +414,25 @@
                 pieceElement.classList.add('piece');
                 pieceElement.dataset.index = i;
 
-                const forceEmergency = (i === 2 && !currentBoardAllowsPlacing && !isFirstRound);
-                const shape = getSmartPieceTemplate(i, forceEmergency);
-
-                if (canPieceFitSomewhere(shape)) {
-                    currentBoardAllowsPlacing = true;
-                }
-
-                const rows = Math.max(...shape.map(b => b[0])) + 1;
-                const cols = Math.max(...shape.map(b => b[1])) + 1;
-                pieceElement.style.gridTemplateRows = `repeat(${rows}, 20px)`;
-                pieceElement.style.gridTemplateColumns = `repeat(${cols}, 20px)`;
+                const template = getValidPieceTemplate();
+                
+                const rows = Math.max(...template.map(b => b[0])) + 1;
+                const cols = Math.max(...template.map(b => b[1])) + 1;
+                pieceElement.style.gridTemplateRows = `repeat(${rows}, 24px)`;
+                pieceElement.style.gridTemplateColumns = `repeat(${cols}, 24px)`;
 
                 const pieceMatrix = Array(rows).fill(null).map(() => Array(cols).fill(0));
-                shape.forEach(b => pieceMatrix[b[0]][b[1]] = 1);
+                template.forEach(b => pieceMatrix[b[0]][b[1]] = 1);
 
-                pieceMatrix.forEach((row, r) => {
-                    row.forEach((val, c) => {
+                pieceMatrix.forEach(row => {
+                    row.forEach(val => {
                         const cell = document.createElement('div');
                         if (val === 1) {
                             cell.classList.add('piece-cell');
                             cell.style.backgroundColor = currentColor;
-                            cell.dataset.relRow = r;
-                            cell.dataset.relCol = c;
+                            cell.innerText = currentEmoji;
                         } else {
                             cell.style.background = 'transparent';
-                            cell.style.border = 'none';
-                            cell.style.boxShadow = 'none';
                         }
                         pieceElement.appendChild(cell);
                     });
@@ -470,7 +440,7 @@
 
                 activePieces.push({
                     id: i,
-                    shape: shape,
+                    template: template,
                     placed: false,
                     element: pieceElement
                 });
@@ -478,20 +448,17 @@
                 container.appendChild(pieceElement);
                 piecesPoolElement.appendChild(container);
 
-                setupDragAndDrop(pieceElement, shape, i);
+                setupDragAndDrop(pieceElement, template, i);
             }
-            isFirstRound = false;
         }
 
-        function setupDragAndDrop(pieceEl, shape, id) {
-            let startTouchX = 0, startTouchY = 0;
-            let currentX = 0, currentY = 0;
+        // Système de Drag & Drop reconstruit à neuf (Ultra Robuste)
+        function setupDragAndDrop(pieceEl, template, id) {
+            let startX, startY;
             let isDragging = false;
             let offsetTouchY = 0;
-            let lastPointerX = 0, lastPointerY = 0;
-            
-            let dragOffsetRow = 0;
-            let dragOffsetCol = 0;
+            let lastPointerX = 0;
+            let lastPointerY = 0;
 
             const onStart = (e) => {
                 e.preventDefault();
@@ -500,49 +467,26 @@
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 
-                startTouchX = clientX;
-                startTouchY = clientY;
-                offsetTouchY = e.touches ? 75 : 0; 
+                startX = clientX;
+                startY = clientY;
+                
+                // Décalage tactile sur mobile pour voir la pièce au-dessus du doigt
+                offsetTouchY = e.touches ? 75 : 0;
 
                 pieceEl.classList.add('dragging');
                 
+                // Agrandissement visuel immédiat pour s'aligner sur la grille
                 pieceEl.querySelectorAll('.piece-cell').forEach(c => {
-                    c.style.width = '44px';
-                    c.style.height = '44px';
-                    c.style.borderRadius = '10px';
+                    c.style.width = '42px';
+                    c.style.height = '42px';
                 });
                 
-                const rows = Math.max(...shape.map(b => b[0])) + 1;
-                const cols = Math.max(...shape.map(b => b[1])) + 1;
-                pieceEl.style.gridTemplateRows = `repeat(${rows}, 44px)`;
-                pieceEl.style.gridTemplateColumns = `repeat(${cols}, 44px)`;
+                const rows = Math.max(...template.map(b => b[0])) + 1;
+                const cols = Math.max(...template.map(b => b[1])) + 1;
+                pieceEl.style.gridTemplateRows = `repeat(${rows}, 42px)`;
+                pieceEl.style.gridTemplateColumns = `repeat(${cols}, 42px)`;
 
-                const subCells = pieceEl.querySelectorAll('.piece-cell');
-                let closestSubCell = subCells[0];
-                let minSubDist = Infinity;
-
-                subCells.forEach(sub => {
-                    const r = sub.getBoundingClientRect();
-                    const centerX = r.left + r.width / 2;
-                    const centerY = r.top + r.height / 2;
-                    const dist = Math.hypot(clientX - centerX, clientY - centerY);
-                    if (dist < minSubDist) {
-                        minSubDist = dist;
-                        closestSubCell = sub;
-                    }
-                });
-
-                dragOffsetRow = parseInt(closestSubCell.dataset.relRow);
-                dragOffsetCol = parseInt(closestSubCell.dataset.relCol);
-
-                const targetRect = closestSubCell.getBoundingClientRect();
-                const subCenterX = targetRect.left + (targetRect.width / 2);
-                const subCenterY = targetRect.top + (targetRect.height / 2);
-
-                startTouchX += (subCenterX - clientX);
-                startTouchY += (subCenterY - clientY);
-
-                playSynthSound(400, 'sine', 0.05);
+                playSynthSound(450, 'sine', 0.05);
                 onMove(e);
             };
 
@@ -552,26 +496,24 @@
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-                currentX = clientX - startTouchX;
-                currentY = (clientY - startTouchY) - offsetTouchY;
+                const dx = clientX - startX;
+                const dy = (clientY - startY) - offsetTouchY;
 
-                pieceEl.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+                pieceEl.style.transform = `translate(${dx}px, ${dy}px)`;
                 
-                const activeAncreCell = pieceEl.querySelector(`[data-rel-row='${dragOffsetRow}'][data-rel-col='${dragOffsetCol}']`);
-                if (activeAncreCell) {
-                    const rect = activeAncreCell.getBoundingClientRect();
-                    lastPointerX = rect.left + (rect.width / 2);
-                    lastPointerY = rect.top + (rect.height / 2);
-                }
+                // On enregistre les coordonnées physiques absolues du premier bloc de la pièce
+                const dragRect = pieceEl.getBoundingClientRect();
+                lastPointerX = dragRect.left + 21; 
+                lastPointerY = dragRect.top + 21;
 
                 clearPreview();
 
                 const targetCell = getCellUnderPoint(lastPointerX, lastPointerY);
                 if (targetCell) {
-                    const startR = parseInt(targetCell.dataset.row) - dragOffsetRow;
-                    const startC = parseInt(targetCell.dataset.col) - dragOffsetCol;
-                    if (canPlacePiece(shape, startR, startC)) {
-                        showPreview(shape, startR, startC);
+                    const startR = parseInt(targetCell.dataset.row);
+                    const startC = parseInt(targetCell.dataset.col);
+                    if (canPlacePiece(template, startR, startC)) {
+                        showPreview(template, startR, startC);
                     }
                 }
             };
@@ -580,29 +522,42 @@
                 if (!isDragging) return;
                 isDragging = false;
                 
+                pieceEl.classList.remove('dragging');
+                pieceEl.style.transform = '';
+                
+                // Retour en format miniature
+                pieceEl.querySelectorAll('.piece-cell').forEach(c => {
+                    c.style.width = '24px';
+                    c.style.height = '24px';
+                });
+                const rows = Math.max(...template.map(b => b[0])) + 1;
+                const cols = Math.max(...template.map(b => b[1])) + 1;
+                pieceEl.style.gridTemplateRows = `repeat(${rows}, 24px)`;
+                pieceEl.style.gridTemplateColumns = `repeat(${cols}, 24px)`;
+
                 clearPreview();
 
+                // Utilisation des dernières coordonnées physiques validées pendant le mouvement
                 const targetCell = getCellUnderPoint(lastPointerX, lastPointerY);
                 let placedSuccessfully = false;
 
                 if (targetCell) {
-                    const startR = parseInt(targetCell.dataset.row) - dragOffsetRow;
-                    const startC = parseInt(targetCell.dataset.col) - dragOffsetCol;
+                    const startR = parseInt(targetCell.dataset.row);
+                    const startC = parseInt(targetCell.dataset.col);
 
-                    if (canPlacePiece(shape, startR, startC)) {
-                        shape.forEach(block => {
-                            grid[startR + block[0]][startC + block[1]] = { filled: true };
+                    if (canPlacePiece(template, startR, startC)) {
+                        template.forEach(block => {
+                            grid[startR + block[0]][startC + block[1]] = {
+                                color: currentColor,
+                                emoji: currentEmoji
+                            };
                         });
                         
                         placedSuccessfully = true;
-                        pieceEl.parentElement.innerHTML = ''; 
+                        pieceEl.parentElement.innerHTML = ''; // Supprime la pièce de son conteneur
                         activePieces.find(p => p.id === id).placed = true;
 
-                        // RÈGLE FIDÈLE : Ajout de 1 point par bloc physique posé
-                        score += shape.length; 
-                        scoreElement.innerText = score;
-
-                        playSynthSound(550, 'sine', 0.08);
+                        playSynthSound(600, 'sine', 0.1);
                         updateBoardUI();
                         checkLines();
                         
@@ -615,55 +570,59 @@
                 }
 
                 if (!placedSuccessfully) {
-                    playSynthSound(120, 'sawtooth', 0.1);
-                    pieceEl.classList.remove('dragging');
-                    pieceEl.style.transform = 'translate3d(0, 0, 0)'; 
-
-                    const rows = Math.max(...shape.map(b => b[0])) + 1;
-                    const cols = Math.max(...shape.map(b => b[1])) + 1;
-                    pieceEl.style.gridTemplateRows = `repeat(${rows}, 20px)`;
-                    pieceEl.style.gridTemplateColumns = `repeat(${cols}, 20px)`;
-
-                    pieceEl.querySelectorAll('.piece-cell').forEach(c => {
-                        c.style.width = ''; c.style.height = ''; c.style.borderRadius = '';
-                    });
+                    playSynthSound(150, 'sawtooth', 0.15);
                 }
             };
 
             pieceEl.addEventListener('mousedown', onStart);
             window.addEventListener('mousemove', onMove);
             window.addEventListener('mouseup', onEnd);
+
             pieceEl.addEventListener('touchstart', onStart, { passive: false });
             window.addEventListener('touchmove', onMove, { passive: false });
             window.addEventListener('touchend', onEnd);
         }
 
+        // Détection élargie avec zone d'attraction magnétique confortable (40px)
         function getCellUnderPoint(x, y) {
             const cells = document.querySelectorAll('.cell');
             let nearestCell = null;
-            let minDistance = 24; 
+            let minDistance = 40; // Zone d'attraction confortable
+
             for (let cell of cells) {
                 const rect = cell.getBoundingClientRect();
                 const cellCenterX = rect.left + rect.width / 2;
                 const cellCenterY = rect.top + rect.height / 2;
+                
                 const dist = Math.hypot(x - cellCenterX, y - cellCenterY);
-                if (dist < minDistance) { minDistance = dist; nearestCell = cell; }
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    nearestCell = cell;
+                }
             }
             return nearestCell;
         }
 
-        function showPreview(shape, startR, startC) {
-            shape.forEach(block => {
-                const r = startR + block[0]; const c = startC + block[1];
+        function showPreview(template, startR, startC) {
+            template.forEach(block => {
+                const r = startR + block[0];
+                const c = startC + block[1];
                 const cell = boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`);
-                if (cell) { cell.classList.add('preview'); cell.style.backgroundColor = currentColor; }
+                if (cell) {
+                    cell.classList.add('preview');
+                    cell.style.backgroundColor = currentColor;
+                }
             });
         }
 
         function clearPreview() {
             document.querySelectorAll('.cell.preview').forEach(cell => {
                 cell.classList.remove('preview');
-                if (!cell.classList.contains('filled')) { cell.style.backgroundColor = ''; }
+                const r = cell.dataset.row;
+                const c = cell.dataset.col;
+                if (!grid[r][c]) {
+                    cell.style.backgroundColor = '';
+                }
             });
         }
 
@@ -672,119 +631,109 @@
             let colsToClear = [];
 
             for (let r = 0; r < BOARD_SIZE; r++) {
-                if (grid[r].every(cell => cell !== null)) rowsToClear.push(r);
+                if (grid[r].every(cell => cell !== null)) {
+                    rowsToClear.push(r);
+                }
             }
+
             for (let c = 0; c < BOARD_SIZE; c++) {
                 let columnFull = true;
                 for (let r = 0; r < BOARD_SIZE; r++) {
-                    if (grid[r][c] === null) { columnFull = false; break; }
+                    if (grid[r][c] === null) {
+                        columnFull = false;
+                        break;
+                    }
                 }
-                if (columnFull) colsToClear.push(c);
+                if (columnFull) {
+                    colsToClear.push(c);
+                }
             }
 
-            const linesCount = rowsToClear.length + colsToClear.length;
-
-            if (linesCount > 0) {
-                comboCount++; // Augmente le multiplicateur si on enchaîne des lignes
-                showComboUI();
-
+            if (rowsToClear.length > 0 || colsToClear.length > 0) {
                 rowsToClear.forEach(r => {
-                    for (let c = 0; c < BOARD_SIZE; c++) {
-                        boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`).classList.add('exploding');
-                    }
+                    for (let c = 0; c < BOARD_SIZE; c++) grid[r][c] = null;
                 });
                 colsToClear.forEach(c => {
-                    for (let r = 0; r < BOARD_SIZE; r++) {
-                        boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`).classList.add('exploding');
-                    }
+                    for (let r = 0; r < BOARD_SIZE; r++) grid[r][c] = null;
                 });
 
-                playSynthSound(700, 'triangle', 0.3);
-
-                rowsToClear.forEach(r => { for (let c = 0; c < BOARD_SIZE; c++) grid[r][c] = null; });
-                colsToClear.forEach(c => { for (let r = 0; r < BOARD_SIZE; r++) grid[r][c] = null; });
-
-                setTimeout(() => {
-                    document.querySelectorAll('.cell.exploding').forEach(cell => {
-                        cell.classList.remove('exploding', 'filled');
-                        cell.style.backgroundColor = '';
-                    });
-                    
-                    // RÈGLE FIDÈLE : Si la parcelle de 8x8 entière est nettoyée de tous ses blocs !
-                    let isBoardTotallyEmpty = true;
-                    for (let r = 0; r < BOARD_SIZE; r++) {
-                        for (let c = 0; c < BOARD_SIZE; c++) {
-                            if (grid[r][c] !== null) { isBoardTotallyEmpty = false; break; }
-                        }
-                    }
-                    
-                    if (isBoardTotallyEmpty) {
-                        score += 5000; // Bonus majeur All Clear de la parcelle
-                        playSynthSound(900, 'sine', 0.5);
-                    }
-
-                    updateBoardUI();
-                    checkGameOver();
-                }, 250);
-
-                // Une ligne = 1000 points * le nombre de lignes * le combo actif
-                let calculatedScore = 1000 * linesCount * comboCount;
-                score += calculatedScore;
+                const linesCount = rowsToClear.length + colsToClear.length;
+                score += linesCount * 150 + (linesCount - 1) * 50;
                 scoreElement.innerText = score;
 
                 if (score > bestScore) {
-                    bestScore = score; bestScoreElement.innerText = bestScore;
+                    bestScore = score;
+                    bestScoreElement.innerText = bestScore;
                     localStorage.setItem('block_blast_best', bestScore);
                 }
-            } else {
-                comboCount = 0; // Reset si aucun bloc n'est éliminé ce coup-ci
-                hideComboUI();
+
+                playSynthSound(900, 'triangle', 0.25);
+                setTimeout(updateBoardUI, 100);
             }
         }
-
-        function showComboUI() {
-            if (comboCount > 1) {
-                comboBadge.innerText = `COMBO x${comboCount}`;
-                comboBadge.classList.add('active');
-            } else {
-                hideComboUI();
-            }
-        }
-
-        function hideComboUI() { comboBadge.classList.remove('active'); }
 
         function checkGameOver() {
             const unplacedPieces = activePieces.filter(p => !p.placed);
             let atLeastOneCanFit = false;
+
             for (let piece of unplacedPieces) {
-                if (canPieceFitSomewhere(piece.shape)) { atLeastOneCanFit = true; break; }
+                if (canPieceFitSomewhere(piece.template)) {
+                    atLeastOneCanFit = true;
+                    break;
+                }
             }
-            if (!atLeastOneCanFit && unplacedPieces.length > 0) {
+
+            if (!atLeastOneCanFit) {
                 playSynthSound(100, 'sawtooth', 0.6);
+                alert("Game Over ! Vous ne pouvez plus poser de pièces.");
                 resetGame();
             }
         }
 
         function resetGame() {
-            score = 0; comboCount = 0; isFirstRound = true;
-            scoreElement.innerText = score; hideComboUI();
+            score = 0;
+            scoreElement.innerText = score;
             grid = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
-            updateBoardUI(); generateNewRound();
+            updateBoardUI();
+            generateNewRound();
         }
 
         document.getElementById('openSettings').addEventListener('click', () => modal.style.display = 'flex');
         document.getElementById('closeSettings').addEventListener('click', () => modal.style.display = 'none');
-        document.getElementById('quitGame').addEventListener('click', () => { resetGame(); modal.style.display = 'none'; });
-
-        colorPicker.addEventListener('input', (e) => {
-            const hexColor = e.target.value.toUpperCase();
-            colorValueText.innerText = hexColor; currentColor = hexColor;
-            document.documentElement.style.setProperty('--primary-color', hexColor);
-            document.querySelectorAll('.piece-cell').forEach(c => c.style.backgroundColor = hexColor);
-            updateBoardUI();
+        document.getElementById('quitGame').addEventListener('click', () => {
+            resetGame();
+            modal.style.display = 'none';
         });
 
-        document.getElementById('volumeSlider').addEventListener('input', (e) => { soundVolume = e.target.value / 100; });
+        document.getElementById('colorSelect').addEventListener('change', (e) => {
+            currentColor = e.target.value;
+            applyStylesToUnplacedPieces();
+        });
+
+        document.getElementById('imageSelect').addEventListener('change', (e) => {
+            currentEmoji = e.target.value;
+            applyStylesToUnplacedPieces();
+        });
+
+        document.getElementById('volumeSlider').addEventListener('input', (e) => {
+            soundVolume = e.target.value / 100;
+        });
+
+        function applyStylesToUnplacedPieces() {
+            document.querySelectorAll('.piece-cell').forEach(c => {
+                c.style.backgroundColor = currentColor;
+                c.innerText = currentEmoji;
+            });
+            for (let r = 0; r < BOARD_SIZE; r++) {
+                for (let c = 0; c < BOARD_SIZE; c++) {
+                    if (grid[r][c]) {
+                        grid[r][c].color = currentColor;
+                        grid[r][c].emoji = currentEmoji;
+                    }
+                }
+            }
+            updateBoardUI();
+        }
 
         createBoard();
         generateNewRound();
