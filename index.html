@@ -27,6 +27,7 @@
             touch-action: none;
         }
 
+        /* Score en haut */
         .header {
             text-align: center;
             margin-bottom: 15px;
@@ -57,6 +58,7 @@
             margin: 0;
         }
 
+        /* Bouton Engrenage */
         .settings-btn {
             position: absolute;
             top: 10px;
@@ -74,6 +76,7 @@
             transform: rotate(45deg);
         }
 
+        /* Zone de Jeu */
         .game-container {
             display: flex;
             flex-direction: column;
@@ -112,6 +115,7 @@
             opacity: 0.6;
         }
 
+        /* Pièces en bas */
         .pieces-pool {
             display: flex;
             justify-content: space-around;
@@ -141,7 +145,7 @@
             position: absolute;
             user-select: none;
             touch-action: none;
-            transition: none;
+            transition: none; /* Désactive les transitions CSS pendant le drag */
         }
 
         .piece.dragging {
@@ -162,6 +166,7 @@
             box-sizing: border-box;
         }
 
+        /* Menu Paramètres (Modal) */
         .modal {
             display: none;
             position: fixed;
@@ -269,6 +274,18 @@
                     <option value="#ffbe0b">Jaune Étoile</option>
                     <option value="#9b5de5">Violet Royal</option>
                     <option value="#3a86c8">Bleu Océan</option>
+                </select>
+            </div>
+
+            <div class="setting-row">
+                <label>📷 Style des blocs (Image/Émoji)</label>
+                <select id="imageSelect">
+                    <option value="">Uni (Sans icône)</option>
+                    <option value="💎" selected>💎 Diamant</option>
+                    <option value="⭐">⭐ Étoile</option>
+                    <option value="🐱">🐱 Chat</option>
+                    <option value="🐶">🐶 Chien</option>
+                    <option value="🔥">🔥 Feu</option>
                 </select>
             </div>
 
@@ -435,6 +452,7 @@
             }
         }
 
+        // Système de Drag & Drop reconstruit à neuf (Ultra Robuste)
         function setupDragAndDrop(pieceEl, template, id) {
             let startX, startY;
             let isDragging = false;
@@ -452,10 +470,12 @@
                 startX = clientX;
                 startY = clientY;
                 
+                // Décalage tactile sur mobile pour voir la pièce au-dessus du doigt
                 offsetTouchY = e.touches ? 75 : 0;
 
                 pieceEl.classList.add('dragging');
                 
+                // Agrandissement visuel immédiat pour s'aligner sur la grille
                 pieceEl.querySelectorAll('.piece-cell').forEach(c => {
                     c.style.width = '42px';
                     c.style.height = '42px';
@@ -481,6 +501,7 @@
 
                 pieceEl.style.transform = `translate(${dx}px, ${dy}px)`;
                 
+                // On enregistre les coordonnées physiques absolues du premier bloc de la pièce
                 const dragRect = pieceEl.getBoundingClientRect();
                 lastPointerX = dragRect.left + 21; 
                 lastPointerY = dragRect.top + 21;
@@ -504,6 +525,7 @@
                 pieceEl.classList.remove('dragging');
                 pieceEl.style.transform = '';
                 
+                // Retour en format miniature
                 pieceEl.querySelectorAll('.piece-cell').forEach(c => {
                     c.style.width = '24px';
                     c.style.height = '24px';
@@ -515,6 +537,7 @@
 
                 clearPreview();
 
+                // Utilisation des dernières coordonnées physiques validées pendant le mouvement
                 const targetCell = getCellUnderPoint(lastPointerX, lastPointerY);
                 let placedSuccessfully = false;
 
@@ -531,7 +554,7 @@
                         });
                         
                         placedSuccessfully = true;
-                        pieceEl.parentElement.innerHTML = ''; 
+                        pieceEl.parentElement.innerHTML = ''; // Supprime la pièce de son conteneur
                         activePieces.find(p => p.id === id).placed = true;
 
                         playSynthSound(600, 'sine', 0.1);
@@ -560,11 +583,12 @@
             window.addEventListener('touchend', onEnd);
         }
 
+        // Détection élargie avec zone d'attraction magnétique confortable (40px)
         function getCellUnderPoint(x, y) {
             const cells = document.querySelectorAll('.cell');
             let nearestCell = null;
-            let minDistance = 40; 
-            
+            let minDistance = 40; // Zone d'attraction confortable
+
             for (let cell of cells) {
                 const rect = cell.getBoundingClientRect();
                 const cellCenterX = rect.left + rect.width / 2;
