@@ -173,7 +173,7 @@
             background-color: var(--primary-color);
         }
 
-        /* Zone de sélection des pièces */
+        /* Zone de sélection */
         .pieces-pool {
             display: flex;
             justify-content: space-around;
@@ -205,7 +205,7 @@
             position: absolute;
             user-select: none;
             touch-action: none;
-            will-change: transform; /* Optimisation performances mobiles */
+            will-change: transform;
         }
 
         .piece.dragging {
@@ -576,21 +576,15 @@
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 
-                // On récupère le centre de l'élément pour que le doigt se positionne pile au milieu
-                const rect = pieceEl.getBoundingClientRect();
-                const elementCenterX = rect.left + rect.width / 2;
-                const elementCenterY = rect.top + rect.height / 2;
-                
-                // Stockage du point d'origine du toucher
                 startTouchX = clientX;
                 startTouchY = clientY;
 
-                // Sur mobile, décale la pièce légèrement au-dessus du doigt pour qu'elle soit visible
+                // Décale verticalement sur mobile pour que le doigt ne cache pas la pièce
                 offsetTouchY = e.touches ? 75 : 0; 
 
                 pieceEl.classList.add('dragging');
                 
-                // Passage instantané aux dimensions d'un bloc du plateau (44px)
+                // Redimensionnement à la taille du plateau (44px + 2px de gap)
                 pieceEl.querySelectorAll('.piece-cell').forEach(c => {
                     c.style.width = '44px';
                     c.style.height = '44px';
@@ -612,16 +606,23 @@
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-                // Calcul du déplacement physique relatif à l'origine
                 currentX = clientX - startTouchX;
                 currentY = (clientY - startTouchY) - offsetTouchY;
 
-                // Application d'un translate3D ultra-fluide sans toucher à "fixed" ou "absolute"
                 pieceEl.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
                 
-                const dragRect = pieceEl.getBoundingClientRect();
-                lastPointerX = dragRect.left + (dragRect.width / 2);
-                lastPointerY = dragRect.top + (dragRect.height / 2);
+                // CORRECTION SÉCURITÉ : On base la recherche de la case cible sur le premier bloc actif [0, 0] de la pièce, 
+                // et non plus sur le centre générique de la boîte englobante.
+                const firstCell = pieceEl.querySelector('.piece-cell');
+                if (firstCell) {
+                    const cellRect = firstCell.getBoundingClientRect();
+                    lastPointerX = cellRect.left + (cellRect.width / 2);
+                    lastPointerY = cellRect.top + (cellRect.height / 2);
+                } else {
+                    const dragRect = pieceEl.getBoundingClientRect();
+                    lastPointerX = dragRect.left + 22;
+                    lastPointerY = dragRect.top + 22;
+                }
 
                 clearPreview();
 
@@ -669,12 +670,11 @@
                     }
                 }
 
-                // SI ECHEC ou RELACHE : Reset instantané et retour à la case départ sans glitch
                 if (!placedSuccessfully) {
                     playSynthSound(120, 'sawtooth', 0.1);
                     
                     pieceEl.classList.remove('dragging');
-                    pieceEl.style.transform = 'translate3d(0, 0, 0)'; // Retour physique à l'origine
+                    pieceEl.style.transform = 'translate3d(0, 0, 0)'; 
 
                     const rows = Math.max(...shape.map(b => b[0])) + 1;
                     const cols = Math.max(...shape.map(b => b[1])) + 1;
@@ -701,7 +701,7 @@
         function getCellUnderPoint(x, y) {
             const cells = document.querySelectorAll('.cell');
             let nearestCell = null;
-            let minDistance = 44; 
+            let minDistance = 30; // Zone d'aimantage resserrée et plus précise
 
             for (let cell of cells) {
                 const rect = cell.getBoundingClientRect();
