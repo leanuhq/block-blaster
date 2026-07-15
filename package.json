@@ -1,0 +1,24 @@
+{
+  "name": "block-blaster",
+  "version": "1.0.0",
+  "description": "Un clone fidèle et ultra-fluide de Block Blast avec paramètres de personnalisation, parfaitement adapté aux smartphones iOS, iPadOS et Android.",
+  "main": "index.html",
+  "author": "x1dl",
+  "license": "MIT",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "cordova": {
+    "platforms": [
+      "ios",
+      "android"
+    ]
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
