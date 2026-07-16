@@ -14,7 +14,6 @@
             --bg-color: #0f172a;
             --grid-bg: #1e293b;
             --cell-empty: #334155;
-            --combo-color: #f43f5e;
         }
 
         * {
@@ -42,7 +41,6 @@
             align-items: center;
             justify-content: space-between;
             
-            /* Prise en compte des encoches/Dynamic Island iOS */
             padding-top: calc(env(safe-area-inset-top) + 10px);
             padding-bottom: calc(env(safe-area-inset-bottom) + 15px);
             transition: background-color 0.3s ease;
@@ -128,6 +126,28 @@
             justify-content: space-between;
             padding: 10px 20px 0 20px;
             position: relative;
+        }
+
+        /* Bouton Sélecteur de Mode (Classique / Tetris) */
+        .mode-selector {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #38bdf8;
+            padding: 8px 14px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .mode-selector.tetris-active {
+            color: #f43f5e;
+            background: rgba(244, 63, 94, 0.1);
+            border-color: rgba(244, 63, 94, 0.2);
         }
 
         .score-container {
@@ -219,9 +239,8 @@
             font-size: 1.4rem;
         }
 
-        /* Aspect 3D discret d'origine pour les blocs posés */
         .block-3d {
-            box-shadow: inset 0 -4px 0 rgba(0,0,0,0.25), inset 0 2px 0 rgba(255,255,255,0.25);
+            box-shadow: inset 0 -4px 0 rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.25);
             border-radius: 6px;
         }
 
@@ -276,10 +295,12 @@
             position: relative;
         }
 
-        /* Assemblage de pièces SANS espace entre ses blocs */
+        /* Grille de pièce : AUCUN ESPACE (Double fusion CSS subpixel) */
         .piece {
             display: grid;
-            gap: 0px !important; /* Force l'absence d'écart physique */
+            gap: 0px !important;
+            padding: 0;
+            margin: 0;
             cursor: grab;
             position: absolute;
             will-change: transform;
@@ -291,18 +312,21 @@
             pointer-events: none;
         }
 
-        /* Blocs miniatures de la pièce */
+        /* Blocs de la pièce soudés à 100% l'un contre l'autre */
         .piece-cell {
             width: 18px;
             height: 18px;
+            margin: -0.8px; /* Déborde volontairement d'une fraction de pixel pour chevaucher les jointures */
+            outline: 1px solid transparent; /* Anti-aliasing optimisé pour combler le lissage écran */
             box-sizing: border-box;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.5rem;
+            position: relative;
         }
 
-        /* --- MODAL PARAMÈTRES D'ORIGINE --- */
+        /* --- MODAL PARAMÈTRES --- */
         .modal {
             display: none;
             position: fixed;
@@ -427,13 +451,17 @@
     </div>
 
     <div class="header">
-        <div class="best-score-box">
-            👑 <span id="best-score">0</span>
-        </div>
+        <button class="mode-selector" id="modeBtn">
+            🎮 <span>Classique</span>
+        </button>
         
         <div class="score-container">
             <div class="score-label">Score</div>
             <div class="score-value" id="score">0</div>
+        </div>
+
+        <div class="best-score-box">
+            👑 <span id="best-score">0</span>
         </div>
 
         <button class="settings-btn" id="openSettings">⚙️</button>
@@ -486,6 +514,7 @@
         const bestScoreElement = document.getElementById('best-score');
         const modal = document.getElementById('settingsModal');
         const mainMenu = document.getElementById('mainMenu');
+        const modeBtn = document.getElementById('modeBtn');
         
         const emojiInput = document.getElementById('emojiInput');
         const pieceColorPicker = document.getElementById('pieceColorPicker');
@@ -502,6 +531,7 @@
         let activePieces = [];
         let currentColor = '#38bdf8';
         let currentEmoji = '';
+        let currentMode = 'classique'; // 'classique' ou 'tetris'
 
         const colors = [
             '#38bdf8', // bleu ciel
@@ -513,11 +543,8 @@
             '#ef4444'  // rouge
         ];
 
-        document.getElementById('btnLaunch').addEventListener('click', () => {
-            mainMenu.classList.add('hidden');
-        });
-
-        const pieceTemplates = [
+        // Formes Classiques (Block Blast)
+        const pieceTemplatesClassic = [
             [[0,0], [0,1]], 
             [[0,0], [1,0]], 
             [[0,0], [0,1], [0,2]], 
@@ -530,6 +557,35 @@
             [[0,0], [0,1], [0,2], [1,1]], 
             [[0,0]] 
         ];
+
+        // Véritables Formes Tetris (Tetrominos)
+        const pieceTemplatesTetris = [
+            [[0,0], [0,1], [0,2], [0,3]], // I
+            [[0,0], [0,1], [1,0], [1,1]], // O
+            [[0,1], [1,0], [1,1], [1,2]], // T
+            [[0,1], [0,2], [1,0], [1,1]], // S
+            [[0,0], [0,1], [1,1], [1,2]], // Z
+            [[0,0], [1,0], [1,1], [1,2]], // J
+            [[0,2], [1,0], [1,1], [1,2]]  // L
+        ];
+
+        document.getElementById('btnLaunch').addEventListener('click', () => {
+            mainMenu.classList.add('hidden');
+        });
+
+        // Gestionnaire d'Événement pour le changement de Mode de jeu
+        modeBtn.addEventListener('click', () => {
+            if (currentMode === 'classique') {
+                currentMode = 'tetris';
+                modeBtn.classList.add('tetris-active');
+                modeBtn.innerHTML = '🧩 <span>Tetris</span>';
+            } else {
+                currentMode = 'classique';
+                modeBtn.classList.remove('tetris-active');
+                modeBtn.innerHTML = '🎮 <span>Classique</span>';
+            }
+            resetGame();
+        });
 
         function createBoard() {
             boardElement.innerHTML = '';
@@ -587,6 +643,8 @@
             piecesPoolElement.innerHTML = '';
             activePieces = [];
             
+            const templates = currentMode === 'tetris' ? pieceTemplatesTetris : pieceTemplatesClassic;
+
             for (let i = 0; i < 3; i++) {
                 const container = document.createElement('div');
                 container.classList.add('piece-container');
@@ -595,7 +653,7 @@
                 pieceElement.classList.add('piece');
                 pieceElement.dataset.index = i;
 
-                const shape = pieceTemplates[Math.floor(Math.random() * pieceTemplates.length)];
+                const shape = templates[Math.floor(Math.random() * templates.length)];
                 
                 const pieceColor = classicColorsToggle.checked 
                     ? colors[Math.floor(Math.random() * colors.length)] 
@@ -881,7 +939,13 @@
                     checkGameOver();
                 }, 350);
 
-                score += linesCount * 100;
+                // Système de point amélioré (Bonus Tetris : 4 lignes = 800 pts en Tetris, sinon 100 pts par ligne)
+                if (currentMode === 'tetris' && linesCount === 4) {
+                    score += 800;
+                } else {
+                    score += linesCount * 100;
+                }
+                
                 scoreElement.innerText = score;
 
                 if (score > bestScore) {
