@@ -6,15 +6,15 @@
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Block Blaster">
+    <meta name="apple-mobile-web-app-title" content="Block Blast">
 
-    <title>Block Blaster</title>
+    <title>Block Blast Puzzle</title>
     <style>
         :root {
-            --bg-color: #2b437e; /* Fond bleu royal identique à l'image */
-            --grid-bg: #151d3b;  /* Plateau de jeu très sombre */
-            --cell-empty: #1a244c; /* Trous de la grille légèrement plus clairs */
-            --combo-color: #ff2d55;
+            --bg-color: #0f172a;
+            --grid-bg: #1e293b;
+            --cell-empty: #334155;
+            --combo-color: #f43f5e;
         }
 
         * {
@@ -42,8 +42,10 @@
             align-items: center;
             justify-content: space-between;
             
+            /* Prise en compte des encoches/Dynamic Island iOS */
             padding-top: calc(env(safe-area-inset-top) + 10px);
             padding-bottom: calc(env(safe-area-inset-bottom) + 15px);
+            transition: background-color 0.3s ease;
         }
 
         /* --- MENU D'ACCUEIL --- */
@@ -53,7 +55,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at center, #2e498c 0%, #192a54 100%);
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
             z-index: 5000;
             display: flex;
             flex-direction: column;
@@ -77,9 +79,8 @@
             margin-top: 50px;
         }
 
-        /* Titre modernisé */
         .title-ios {
-            font-size: 3.4rem;
+            font-size: 3.2rem;
             font-weight: 900;
             text-align: center;
             letter-spacing: -1.5px;
@@ -87,36 +88,35 @@
             color: #ffffff;
             text-transform: uppercase;
             line-height: 0.95;
-            text-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .title-ios span {
             display: block;
-            font-size: 2.8rem;
-            background: linear-gradient(135deg, #00d2ff, #0072ff);
+            font-size: 2.4rem;
+            background: linear-gradient(135deg, #38bdf8, #0284c7);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 800;
         }
 
         .btn-launch-ios {
-            background: linear-gradient(180deg, #ffcc00 0%, #ff9500 100%);
-            color: #ffffff;
+            background: #ffffff;
+            color: #000000;
             border: none;
             width: 100%;
             max-width: 290px;
             padding: 18px 0;
-            font-size: 1.5rem;
-            font-weight: 900;
+            font-size: 1.2rem;
+            font-weight: 700;
             border-radius: 24px;
             cursor: pointer;
-            box-shadow: 0 10px 25px rgba(255, 149, 0, 0.4), inset 0 2px 3px rgba(255,255,255,0.4);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255,255,255,0.4);
             transition: transform 0.1s ease;
-            text-transform: uppercase;
         }
 
         .btn-launch-ios:active {
-            transform: scale(0.95);
+            transform: scale(0.96);
         }
 
         /* --- ZONE DE JEU --- */
@@ -137,48 +137,48 @@
             flex-grow: 1;
         }
 
-        /* Coeur / Score central identique à l'image */
-        .heart-score-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 5px;
-        }
-
-        .heart-bg {
-            font-size: 4.5rem;
-            filter: drop-shadow(0 0 15px rgba(235, 78, 227, 0.8));
-            line-height: 1;
+        .score-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #64748b;
+            margin-bottom: 2px;
         }
 
         .score-value {
-            position: absolute;
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: 800;
             color: #ffffff;
+            line-height: 1;
             letter-spacing: -1px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .best-score-box {
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: #ffcc00;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #94a3b8;
             gap: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .settings-btn {
             background: none;
             border: none;
-            font-size: 2rem;
+            font-size: 1.5rem;
             cursor: pointer;
-            color: #a4b3d6;
+            color: #64748b;
+            padding: 8px;
+            transition: color 0.2s;
+        }
+
+        .settings-btn:active {
+            color: #ffffff;
         }
 
         .game-container {
@@ -191,16 +191,16 @@
             justify-content: center;
         }
 
-        /* Grille texturée serrée */
+        /* Plateau de Jeu */
         .board {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             grid-template-rows: repeat(8, 1fr);
-            gap: 2.5px; /* Écart minimal pour séparer proprement les cases */
+            gap: 4px;
             background-color: var(--grid-bg);
-            padding: 6px;
-            border-radius: 12px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            padding: 8px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             width: 92vw;
             height: 92vw;
             max-width: 360px;
@@ -210,22 +210,19 @@
         /* Cases de la grille */
         .cell {
             background-color: var(--cell-empty);
-            border-radius: 3px;
+            border-radius: 6px;
+            transition: background-color 0.15s, transform 0.1s;
             position: relative;
-            box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
         }
 
-        /* --- BLOCS STYLE BISEAUTÉ GEMME (COMMUNS GRILLE & RÉSERVE) --- */
+        /* Aspect 3D discret d'origine pour les blocs posés */
         .block-3d {
-            box-sizing: border-box;
-            border: 4.5px solid;
-            /* Effet biseauté de l'image (haut/gauche brillant, bas/droite sombre) */
-            border-top-color: rgba(255, 255, 255, 0.45);
-            border-left-color: rgba(255, 255, 255, 0.45);
-            border-right-color: rgba(0, 0, 0, 0.35);
-            border-bottom-color: rgba(0, 0, 0, 0.35);
-            border-radius: 4px;
-            box-shadow: inset 1px 1px 1px rgba(255,255,255,0.2);
+            box-shadow: inset 0 -4px 0 rgba(0,0,0,0.25), inset 0 2px 0 rgba(255,255,255,0.25);
+            border-radius: 6px;
         }
 
         /* --- ANIMATION D'EXPLOSION --- */
@@ -253,7 +250,7 @@
         }
 
         .cell.preview {
-            opacity: 0.35;
+            opacity: 0.4;
         }
 
         /* Zone des pièces de rechange */
@@ -264,7 +261,10 @@
             width: 92vw;
             max-width: 360px;
             height: 110px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
             padding: 5px;
+            border: 1px solid rgba(255,255,255,0.02);
         }
 
         .piece-container {
@@ -276,10 +276,10 @@
             position: relative;
         }
 
-        /* Pièce assemblée sans AUCUN espace vide entre ses blocs */
+        /* Assemblage de pièces SANS espace entre ses blocs */
         .piece {
             display: grid;
-            gap: 0px !important; /* SUPPRIME TOUT ESPACE entre les blocs d'une pièce */
+            gap: 0px !important; /* Force l'absence d'écart physique */
             cursor: grab;
             position: absolute;
             will-change: transform;
@@ -291,14 +291,18 @@
             pointer-events: none;
         }
 
-        /* Blocs miniatures dans la réserve */
+        /* Blocs miniatures de la pièce */
         .piece-cell {
             width: 18px;
             height: 18px;
             box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.5rem;
         }
 
-        /* --- MODAL PARAMÈTRES --- */
+        /* --- MODAL PARAMÈTRES D'ORIGINE --- */
         .modal {
             display: none;
             position: fixed;
@@ -306,53 +310,130 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(10, 15, 30, 0.8);
+            background: rgba(15, 23, 42, 0.7);
             z-index: 2000;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(15px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
         .modal-content {
-            background: #1c2541;
-            padding: 25px;
-            border-radius: 24px;
+            background: #1e293b;
+            padding: 24px;
+            border-radius: 28px;
             width: 90%;
             max-width: 340px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        .modal-content h3 { margin: 0; text-align: center; }
-        .setting-row { display: flex; flex-direction: column; gap: 6px; }
-        .setting-row label { font-size: 0.75rem; color: #8a99ad; text-transform: uppercase; }
-        
-        .btn-block { width: 100%; padding: 14px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; }
-        .btn-close { background: #ffffff; color: #000; }
+        .modal-content h3 {
+            margin: 0 0 4px 0;
+            font-size: 1.3rem;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .setting-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .setting-row label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"] {
+            background: #0f172a;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 12px 14px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #38bdf8;
+        }
+
+        .color-inputs {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .color-inputs input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            cursor: pointer;
+            background: none;
+        }
+
+        .color-inputs input[type="color"]::-webkit-color-swatch {
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+        }
+
+        .toggle-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-block {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn-block:active {
+            transform: scale(0.97);
+        }
+
+        .btn-close {
+            background: #ffffff;
+            color: #000000;
+        }
     </style>
 </head>
 <body>
 
     <div id="mainMenu">
         <div class="menu-top-content">
-            <h1 class="title-ios">BLOCK<span>BLASTER</span></h1>
+            <h1 class="title-ios">BLOCK<span>BLAST</span></h1>
         </div>
-        <button class="btn-launch-ios" id="btnLaunch">JOUER</button>
-        <div style="font-size: 0.8rem; color: #a4b3d6;">PROJET BLOCK PUZZLE</div>
+        <button class="btn-launch-ios" id="btnLaunch">Commencer</button>
+        <div style="font-size: 0.8rem; color: #64748b; font-weight: 500; letter-spacing: 0.5px;">MINIMAL EDITION</div>
     </div>
 
     <div class="header">
         <div class="best-score-box">
-            👑 <span id="best-score">2983</span>
+            👑 <span id="best-score">0</span>
         </div>
         
         <div class="score-container">
-            <div class="heart-score-wrapper">
-                <span class="heart-bg">💜</span>
-                <div class="score-value" id="score">0</div>
-            </div>
+            <div class="score-label">Score</div>
+            <div class="score-value" id="score">0</div>
         </div>
 
         <button class="settings-btn" id="openSettings">⚙️</button>
@@ -365,8 +446,35 @@
 
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h3>Options</h3>
-            <button class="btn-block btn-close" id="closeSettings">Fermer</button>
+            <h3>Paramètres</h3>
+            
+            <div class="setting-row">
+                <label>Texte / Emoji sur les Blocs</label>
+                <input type="text" id="emojiInput" maxlength="2" placeholder="Ex: 👾, 🌟, AB...">
+            </div>
+
+            <div class="setting-row">
+                <label>Couleur unie des pièces</label>
+                <div class="color-inputs">
+                    <input type="color" id="pieceColorPicker" value="#38bdf8">
+                    <input type="text" id="pieceColorText" value="#38BDF8" style="flex-grow: 1;">
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <label>Couleur de l'arrière-plan</label>
+                <div class="color-inputs">
+                    <input type="color" id="bgColorPicker" value="#0f172a">
+                    <input type="text" id="bgColorText" value="#0F172A" style="flex-grow: 1;">
+                </div>
+            </div>
+
+            <div class="setting-row toggle-group">
+                <label>Couleurs Aléatoires (Classique)</label>
+                <input type="checkbox" id="classicColorsToggle" checked style="width: 20px; height: 20px; accent-color: #38bdf8;">
+            </div>
+
+            <button class="btn-block btn-close" id="closeSettings">Enregistrer</button>
         </div>
     </div>
 
@@ -378,41 +486,48 @@
         const bestScoreElement = document.getElementById('best-score');
         const modal = document.getElementById('settingsModal');
         const mainMenu = document.getElementById('mainMenu');
+        
+        const emojiInput = document.getElementById('emojiInput');
+        const pieceColorPicker = document.getElementById('pieceColorPicker');
+        const pieceColorText = document.getElementById('pieceColorText');
+        const bgColorPicker = document.getElementById('bgColorPicker');
+        const bgColorText = document.getElementById('bgColorText');
+        const classicColorsToggle = document.getElementById('classicColorsToggle');
 
         let score = 0;
-        let bestScore = localStorage.getItem('block_blast_best') || 2983;
+        let bestScore = localStorage.getItem('block_blast_best') || 0;
         bestScoreElement.innerText = bestScore;
 
         let grid = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
         let activePieces = [];
+        let currentColor = '#38bdf8';
+        let currentEmoji = '';
 
-        // Couleurs biseautées inspirées de votre image
         const colors = [
-            '#4fc3f7', // Cyan / Bleu clair
-            '#3f51b5', // Bleu foncé
-            '#ff9800', // Orange
-            '#e040fb', // Violet / Pourpre
-            '#ffeb3b', // Jaune
-            '#4caf50', // Vert
-            '#f44336'  // Rouge
+            '#38bdf8', // bleu ciel
+            '#ec4899', // rose
+            '#eab308', // jaune
+            '#22c55e', // vert
+            '#a855f7', // violet
+            '#f97316', // orange
+            '#ef4444'  // rouge
         ];
 
         document.getElementById('btnLaunch').addEventListener('click', () => {
             mainMenu.classList.add('hidden');
         });
 
-        // Formes classiques de blocs
         const pieceTemplates = [
             [[0,0], [0,1]], 
             [[0,0], [1,0]], 
             [[0,0], [0,1], [0,2]], 
             [[0,0], [1,0], [2,0]], 
-            [[0,0], [0,1], [1,0], [1,1]], // Carré 2x2
+            [[0,0], [0,1], [1,0], [1,1]], 
             [[0,0], [1,0], [1,1]], 
             [[0,1], [1,1], [1,0]], 
-            [[0,0], [1,0], [2,0], [2,1]], // Forme en L
+            [[0,0], [1,0], [2,0], [2,1]], 
             [[0,1], [1,1], [2,1], [2,0]], 
-            [[0,0], [0,1], [0,2], [1,1]], // T
+            [[0,0], [0,1], [0,2], [1,1]], 
             [[0,0]] 
         ];
 
@@ -438,9 +553,11 @@
                     cell.className = 'cell';
                     if (grid[r][c]) {
                         cell.classList.add('block-3d');
-                        cell.style.backgroundColor = grid[r][c];
+                        cell.style.backgroundColor = grid[r][c].color;
+                        cell.innerText = grid[r][c].emoji || '';
                     } else {
                         cell.style.backgroundColor = '';
+                        cell.innerText = '';
                     }
                 }
             }
@@ -479,7 +596,10 @@
                 pieceElement.dataset.index = i;
 
                 const shape = pieceTemplates[Math.floor(Math.random() * pieceTemplates.length)];
-                const pieceColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                const pieceColor = classicColorsToggle.checked 
+                    ? colors[Math.floor(Math.random() * colors.length)] 
+                    : currentColor;
 
                 const rows = Math.max(...shape.map(b => b[0])) + 1;
                 const cols = Math.max(...shape.map(b => b[1])) + 1;
@@ -496,6 +616,7 @@
                         if (val === 1) {
                             cell.classList.add('piece-cell', 'block-3d');
                             cell.style.backgroundColor = pieceColor;
+                            cell.innerText = currentEmoji;
                             cell.dataset.relRow = r;
                             cell.dataset.relCol = c;
                         } else {
@@ -551,6 +672,7 @@
                 pieceEl.querySelectorAll('.piece-cell').forEach(c => {
                     c.style.width = `${idealSize}px`;
                     c.style.height = `${idealSize}px`;
+                    c.style.fontSize = '1.2rem';
                 });
                 
                 const rows = Math.max(...shape.map(b => b[0])) + 1;
@@ -631,7 +753,10 @@
 
                     if (canPlacePiece(shape, startR, startC)) {
                         shape.forEach(block => {
-                            grid[startR + block[0]][startC + block[1]] = pieceColor;
+                            grid[startR + block[0]][startC + block[1]] = {
+                                color: pieceColor,
+                                emoji: currentEmoji
+                            };
                         });
                         
                         placedSuccessfully = true;
@@ -664,6 +789,7 @@
                     pieceEl.querySelectorAll('.piece-cell').forEach(c => {
                         c.style.width = ''; 
                         c.style.height = '';
+                        c.style.fontSize = '';
                     });
                 }
             };
@@ -697,6 +823,7 @@
                 if (cell) { 
                     cell.classList.add('preview', 'block-3d'); 
                     cell.style.backgroundColor = color; 
+                    cell.innerText = currentEmoji;
                 }
             });
         }
@@ -706,12 +833,12 @@
                 cell.classList.remove('preview');
                 if (!cell.classList.contains('filled')) { 
                     cell.style.backgroundColor = ''; 
+                    cell.innerText = '';
                     cell.classList.remove('block-3d');
                 }
             });
         }
 
-        /* --- ANIMATION ET DESTRUCTION DE LIGNE --- */
         function checkLines() {
             let rowsToClear = [];
             let colsToClear = [];
@@ -730,7 +857,6 @@
             const linesCount = rowsToClear.length + colsToClear.length;
 
             if (linesCount > 0) {
-                // Déclenche l'animation d'explosion sur les éléments concernés
                 rowsToClear.forEach(r => {
                     for (let c = 0; c < BOARD_SIZE; c++) {
                         boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`).classList.add('exploding');
@@ -742,15 +868,14 @@
                     }
                 });
 
-                // Supprime du modèle logique
                 rowsToClear.forEach(r => { for (let c = 0; c < BOARD_SIZE; c++) grid[r][c] = null; });
                 colsToClear.forEach(c => { for (let r = 0; r < BOARD_SIZE; r++) grid[r][c] = null; });
 
-                // Attend la fin de la transition d'explosion (350ms) pour nettoyer le plateau de jeu
                 setTimeout(() => {
                     document.querySelectorAll('.cell.exploding').forEach(cell => {
                         cell.classList.remove('exploding', 'block-3d');
                         cell.style.backgroundColor = '';
+                        cell.innerText = '';
                     });
                     updateBoardUI();
                     checkGameOver();
@@ -785,12 +910,37 @@
             generateNewRound();
         }
 
+        pieceColorPicker.addEventListener('input', (e) => {
+            pieceColorText.value = e.target.value.toUpperCase();
+        });
+        pieceColorText.addEventListener('input', (e) => {
+            if(/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                pieceColorPicker.value = e.target.value;
+            }
+        });
+
+        bgColorPicker.addEventListener('input', (e) => {
+            bgColorText.value = e.target.value.toUpperCase();
+        });
+        bgColorText.addEventListener('input', (e) => {
+            if(/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                bgColorPicker.value = e.target.value;
+            }
+        });
+
         document.getElementById('openSettings').addEventListener('click', () => {
             modal.style.display = 'flex';
         });
         
         document.getElementById('closeSettings').addEventListener('click', () => {
+            currentEmoji = emojiInput.value.trim();
+            currentColor = pieceColorPicker.value;
+
+            document.documentElement.style.setProperty('--bg-color', bgColorPicker.value);
+
             modal.style.display = 'none';
+            generateNewRound();
+            updateBoardUI();
         });
 
         createBoard();
