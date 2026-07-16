@@ -3,217 +3,702 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Block Blast Puzzle & Tetris</title>
+    <meta name="apple-mobile-web-app-title" content="Block Blast">
+
+    <title>Block Blast Puzzle vs Tetris</title>
     <style>
         :root {
             --bg-color: #0f172a;
             --grid-bg: #1e293b;
             --cell-empty: #334155;
-            --primary: #38bdf8;
         }
 
-        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; touch-action: none; }
-        
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
         html, body {
-            width: 100%; height: 100%; overflow: hidden;
-            background-color: var(--bg-color); overscroll-behavior: none; margin: 0; padding: 0;
-            color: white; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", sans-serif;
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            overscroll-behavior: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            
             padding-top: calc(env(safe-area-inset-top) + 10px);
             padding-bottom: calc(env(safe-area-inset-bottom) + 15px);
             transition: background-color 0.3s ease;
         }
 
-        /* --- MENU D'ACCUEIL COMPLET AVEC LOGO ET EASTER EGG --- */
+        /* --- MENU D'ACCUEIL --- */
         #mainMenu {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
-            z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            z-index: 5000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
             padding: calc(env(safe-area-inset-top) + 40px) 20px calc(env(safe-area-inset-bottom) + 35px) 20px;
             transition: opacity 0.4s ease, visibility 0.4s;
         }
-        #mainMenu.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        
-        .menu-top-content { display: flex; flex-direction: column; align-items: center; gap: 25px; margin-top: 40px; }
-        
-        /* Logo cliquable pour l'Easter Egg */
-        .logo-box { 
-            width: 120px; height: 120px; 
-            background: linear-gradient(135deg, #38bdf8, #0284c7); 
-            border-radius: 30px; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 4rem; 
-            box-shadow: 0 15px 35px rgba(2, 132, 199, 0.4); 
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-        .logo-box:active { transform: scale(0.9); }
 
-        .title-ios { font-size: 3.2rem; font-weight: 900; text-align: center; margin: 0; text-transform: uppercase; line-height: 0.95; }
-        .title-ios span { display: block; font-size: 2.4rem; background: linear-gradient(135deg, #38bdf8, #0284c7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .btn-launch-ios { background: #ffffff; color: #000000; border: none; width: 100%; max-width: 290px; padding: 18px 0; font-size: 1.2rem; font-weight: 700; border-radius: 24px; cursor: pointer; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25); transition: transform 0.1s; }
-        .btn-launch-ios:active { transform: scale(0.96); }
+        #mainMenu.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .menu-top-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 50px;
+        }
+
+        .title-ios {
+            font-size: 3.2rem;
+            font-weight: 900;
+            text-align: center;
+            letter-spacing: -1.5px;
+            margin: 0;
+            color: #ffffff;
+            text-transform: uppercase;
+            line-height: 0.95;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .title-ios span {
+            display: block;
+            font-size: 2.4rem;
+            background: linear-gradient(135deg, #38bdf8, #0284c7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 40px;
+        }
+
+        .btn-launch-mode {
+            border: none;
+            width: 100%;
+            padding: 18px 0;
+            font-size: 1.15rem;
+            font-weight: 800;
+            border-radius: 24px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255,255,255,0.4);
+            transition: transform 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-classic-style {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .btn-tetris-style {
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            color: #ffffff;
+            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.35);
+        }
+
+        .btn-launch-mode:active {
+            transform: scale(0.96);
+        }
 
         /* --- ZONE DE JEU --- */
-        .header { width: 100%; max-width: 380px; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px 0 20px; }
-        .mode-selector { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--primary); padding: 8px 14px; border-radius: 16px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-        .mode-selector.tetris-active { color: #f43f5e; background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.2); }
-        .score-container { display: flex; flex-direction: column; align-items: center; flex-grow: 1; }
-        .score-label { font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 2px; }
-        .score-value { font-size: 2.4rem; font-weight: 800; color: #ffffff; line-height: 1; }
-        .best-score-box { background: rgba(255, 255, 255, 0.06); padding: 6px 12px; border-radius: 16px; font-size: 0.9rem; font-weight: 600; color: #94a3b8; }
-        .settings-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; padding: 8px; }
-
-        /* --- BARRE DES COMBOS DE POINTS --- */
-        .combo-bar {
-            display: none; align-items: center; justify-content: center; gap: 8px;
-            background: linear-gradient(90deg, #f43f5e, #fb923c);
-            padding: 6px 20px; border-radius: 20px; font-size: 1rem; font-weight: 900;
-            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4); text-transform: uppercase;
-            animation: pulseCombo 0.4s infinite alternate; margin-bottom: -10px; z-index: 10;
+        .header {
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px 0 20px;
+            position: relative;
         }
-        @keyframes pulseCombo { from { transform: scale(1); } to { transform: scale(1.08); } }
 
-        .game-container { display: flex; flex-direction: column; align-items: center; gap: 20px; width: 100%; flex-grow: 1; justify-content: center; }
+        .back-to-menu-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            padding: 8px 14px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
 
-        /* Grilles adaptatives */
-        .board { background-color: var(--grid-bg); padding: 6px; border-radius: 16px; display: grid; gap: 3px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); }
-        .board.classic { grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); width: 92vw; height: 92vw; max-width: 380px; max-height: 380px; }
-        .board.tetris { grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(20, 1fr); width: 75vw; height: 150vw; max-width: 320px; max-height: 640px; margin: 0 auto; }
+        .back-to-menu-btn:active {
+            background: rgba(255, 255, 255, 0.15);
+        }
 
-        .cell { background-color: var(--cell-empty); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: background-color 0.1s; }
-        .block-3d { box-shadow: inset 0 -4px 0 rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.25); border-radius: 4px; }
-        .cell.exploding { animation: block-explosion 0.35s forwards; z-index: 100; }
-        @keyframes block-explosion { 0% { transform: scale(1); filter: brightness(1.8); } 100% { transform: scale(0.4); opacity: 0; } }
+        .score-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+        }
 
-        /* Pièces D&D */
-        .pieces-pool { display: flex; justify-content: space-around; width: 92vw; max-width: 380px; height: 100px; background: rgba(255, 255, 255, 0.02); border-radius: 20px; }
-        .piece-container { width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; position: relative; }
-        .piece { display: grid; gap: 0px !important; margin: 0; cursor: grab; position: absolute; will-change: transform; }
-        .piece.dragging { cursor: grabbing; z-index: 1000; pointer-events: none; }
-        .piece-cell { width: 18px; height: 18px; margin: -0.8px; display: flex; align-items: center; justify-content: center; }
+        .score-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #64748b;
+            margin-bottom: 2px;
+        }
 
-        /* Paramètres */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.8); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
-        .modal-content { background: #1e293b; padding: 24px; border-radius: 28px; width: 90%; max-width: 340px; display: flex; flex-direction: column; gap: 16px; border: 1px solid rgba(255,255,255,0.1); }
-        .setting-row { display: flex; flex-direction: column; gap: 6px; }
-        .setting-row label { font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
-        input[type="text"] { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 14px; outline: none; }
-        .color-inputs { display: flex; gap: 8px; }
-        .color-inputs input[type="color"] { border: none; width: 42px; height: 42px; border-radius: 12px; background: none; cursor: pointer; }
-        .btn-block { width: 100%; padding: 14px; border: none; border-radius: 16px; font-weight: 700; font-size: 1rem; background: #fff; color: #000; cursor: pointer; }
+        .score-value {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+
+        .best-score-box {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #94a3b8;
+            gap: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+            padding: 8px;
+            transition: color 0.2s;
+        }
+
+        .settings-btn:active {
+            color: #ffffff;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            width: 100%;
+            flex-grow: 1;
+            justify-content: center;
+        }
+
+        /* Plateaux de Jeu Adaptatifs */
+        .board {
+            display: grid;
+            background-color: var(--grid-bg);
+            padding: 8px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .board.classic-mode {
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            gap: 4px;
+            width: 92vw;
+            height: 92vw;
+            max-width: 360px;
+            max-height: 360px;
+        }
+
+        .board.tetris-mode {
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(20, 1fr);
+            gap: 2px;
+            width: 72vw;
+            height: 144vw;
+            max-width: 300px;
+            max-height: 600px;
+        }
+
+        /* Cases de la grille */
+        .cell {
+            background-color: var(--cell-empty);
+            border-radius: 6px;
+            transition: background-color 0.15s, transform 0.1s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+
+        .board.tetris-mode .cell {
+            border-radius: 3px;
+            font-size: 1rem;
+        }
+
+        .block-3d {
+            box-shadow: inset 0 -4px 0 rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.25);
+            border-radius: 6px;
+        }
+
+        .board.tetris-mode .block-3d {
+            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+
+        /* --- ANIMATION D'EXPLOSION --- */
+        @keyframes block-explosion {
+            0% {
+                transform: scale(1);
+                filter: brightness(1.8);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.15);
+                filter: brightness(2);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(0.4);
+                filter: brightness(0.5);
+                opacity: 0;
+            }
+        }
+
+        .cell.exploding {
+            animation: block-explosion 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 100;
+        }
+
+        .cell.preview {
+            opacity: 0.4;
+        }
+
+        /* Zone des pièces de rechange */
+        .pieces-pool {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 92vw;
+            max-width: 360px;
+            height: 110px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
+            padding: 5px;
+            border: 1px solid rgba(255,255,255,0.02);
+        }
+
+        .piece-container {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Grille de pièce */
+        .piece {
+            display: grid;
+            gap: 0px !important;
+            padding: 0;
+            margin: 0;
+            cursor: grab;
+            position: absolute;
+            will-change: transform;
+        }
+
+        .piece.dragging {
+            cursor: grabbing;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        /* Blocs de la pièce soudés à 100% l'un contre l'autre */
+        .piece-cell {
+            width: 18px;
+            height: 18px;
+            margin: -0.8px; 
+            outline: 1px solid transparent; 
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.5rem;
+            position: relative;
+        }
+
+        /* Contrôles tactiles (Tetris uniquement) */
+        .tetris-controls {
+            display: none;
+            width: 100%;
+            max-width: 300px;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 0 10px;
+        }
+
+        .ctrl-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 12px 0;
+            border-radius: 16px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .ctrl-btn:active {
+            background: rgba(255, 255, 255, 0.18);
+            transform: scale(0.95);
+        }
+
+        /* --- MODAL PARAMÈTRES --- */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .modal-content {
+            background: #1e293b;
+            padding: 24px;
+            border-radius: 28px;
+            width: 90%;
+            max-width: 340px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content h3 {
+            margin: 0 0 4px 0;
+            font-size: 1.3rem;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .setting-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .setting-row label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"] {
+            background: #0f172a;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 12px 14px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #38bdf8;
+        }
+
+        .color-inputs {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .color-inputs input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            cursor: pointer;
+            background: none;
+        }
+
+        .color-inputs input[type="color"]::-webkit-color-swatch {
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+        }
+
+        .toggle-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-block {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn-block:active {
+            transform: scale(0.97);
+        }
+
+        .btn-close {
+            background: #ffffff;
+            color: #000000;
+        }
     </style>
 </head>
 <body>
 
     <div id="mainMenu">
         <div class="menu-top-content">
-            <div class="logo-box" id="logoBtn">🧩</div>
             <h1 class="title-ios">BLOCK<span>BLAST</span></h1>
         </div>
-        <button class="btn-launch-ios" id="btnLaunch">Commencer</button>
-        <div style="font-size: 0.8rem; color: #64748b; font-weight: 500; letter-spacing: 0.5px;">ÉDITION COMPLETE</div>
+        <div class="menu-buttons">
+            <button class="btn-launch-mode btn-classic-style" id="btnLaunchClassic">🎮 Block Blast (8x8)</button>
+            <button class="btn-launch-mode btn-tetris-style" id="btnLaunchTetris">🧱 Mode Tetris (10x20)</button>
+        </div>
+        <div style="font-size: 0.8rem; color: #64748b; font-weight: 500; letter-spacing: 0.5px;">PRO PRESTIGE EDITION</div>
     </div>
 
     <div class="header">
-        <button class="mode-selector" id="modeBtn">🎮 <span>Classique</span></button>
+        <button class="back-to-menu-btn" id="btnBackToMenu">↩ Menu</button>
+        
         <div class="score-container">
-            <div class="score-label">Score</div>
+            <div class="score-label" id="modeIndicatorLabel">Block Blast</div>
             <div class="score-value" id="score">0</div>
         </div>
-        <div class="best-score-box">👑 <span id="best-score">0</span></div>
+
+        <div class="best-score-box">
+            👑 <span id="best-score">0</span>
+        </div>
+
         <button class="settings-btn" id="openSettings">⚙️</button>
     </div>
 
-    <div class="combo-bar" id="comboContainer">
-        🔥 COMBO <span id="comboMultiplier">x1</span>
-    </div>
-
     <div class="game-container">
-        <div class="board classic" id="board"></div>
+        <div class="board classic-mode" id="board"></div>
+        
         <div class="pieces-pool" id="piecesPool"></div>
+
+        <div class="tetris-controls" id="tetrisControls">
+            <button class="ctrl-btn" id="ctrlLeft">◀</button>
+            <button class="ctrl-btn" id="ctrlRotate">🔄</button>
+            <button class="ctrl-btn" id="ctrlRight">▶</button>
+            <button class="ctrl-btn" id="ctrlDown">▼</button>
+        </div>
     </div>
 
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h3 style="margin:0;text-align:center;">Paramètres</h3>
-            <div class="setting-row"><label>Emoji</label><input type="text" id="emojiInput" maxlength="2"></div>
+            <h3>Paramètres</h3>
+            
             <div class="setting-row">
-                <label>Couleur unie</label>
-                <div class="color-inputs"><input type="color" id="pieceColorPicker" value="#38bdf8"><input type="text" id="pieceColorText" value="#38BDF8" style="flex-grow:1;"></div>
+                <label>Texte / Emoji sur les Blocs</label>
+                <input type="text" id="emojiInput" maxlength="2" placeholder="Ex: 👾, 🌟, AB...">
             </div>
-            <div class="setting-row" style="flex-direction:row;justify-content:space-between;">
-                <label>Couleurs Aléatoires</label><input type="checkbox" id="classicColorsToggle" checked style="width:20px;height:20px;">
+
+            <div class="setting-row">
+                <label>Couleur unie des pièces</label>
+                <div class="color-inputs">
+                    <input type="color" id="pieceColorPicker" value="#38bdf8">
+                    <input type="text" id="pieceColorText" value="#38BDF8" style="flex-grow: 1;">
+                </div>
             </div>
-            <button class="btn-block" id="closeSettings">Enregistrer</button>
+
+            <div class="setting-row">
+                <label>Couleur de l'arrière-plan</label>
+                <div class="color-inputs">
+                    <input type="color" id="bgColorPicker" value="#0f172a">
+                    <input type="text" id="bgColorText" value="#0F172A" style="flex-grow: 1;">
+                </div>
+            </div>
+
+            <div class="setting-row toggle-group">
+                <label>Couleurs Aléatoires (Classique)</label>
+                <input type="checkbox" id="classicColorsToggle" checked style="width: 20px; height: 20px; accent-color: #38bdf8;">
+            </div>
+
+            <button class="btn-block btn-close" id="closeSettings">Enregistrer</button>
         </div>
     </div>
 
     <script>
+        // Dimensions dynamiques selon le mode de jeu
+        let BOARD_ROWS = 8;
+        let BOARD_COLS = 8;
+
         const boardElement = document.getElementById('board');
         const piecesPoolElement = document.getElementById('piecesPool');
+        const tetrisControls = document.getElementById('tetrisControls');
         const scoreElement = document.getElementById('score');
-        const comboContainer = document.getElementById('comboContainer');
-        const comboMultiplierText = document.getElementById('comboMultiplier');
+        const bestScoreElement = document.getElementById('best-score');
+        const modal = document.getElementById('settingsModal');
+        const mainMenu = document.getElementById('mainMenu');
+        const modeIndicatorLabel = document.getElementById('modeIndicatorLabel');
         
-        let BOARD_COLS = 8, BOARD_ROWS = 8;
+        const emojiInput = document.getElementById('emojiInput');
+        const pieceColorPicker = document.getElementById('pieceColorPicker');
+        const pieceColorText = document.getElementById('pieceColorText');
+        const bgColorPicker = document.getElementById('bgColorPicker');
+        const bgColorText = document.getElementById('bgColorText');
+        const classicColorsToggle = document.getElementById('classicColorsToggle');
+
         let score = 0;
-        let bestScore = localStorage.getItem('bb_score') || 0;
-        document.getElementById('best-score').innerText = bestScore;
-        
-        let combo = 0;
+        let bestScoreClassic = localStorage.getItem('block_blast_best') || 0;
+        let bestScoreTetris = localStorage.getItem('tetris_best') || 0;
+
         let grid = [];
-        let currentMode = 'classique'; 
+        let activePieces = [];
         let currentColor = '#38bdf8';
         let currentEmoji = '';
-        const colors = ['#38bdf8', '#ec4899', '#eab308', '#22c55e', '#a855f7', '#f97316', '#ef4444'];
+        let currentMode = 'classique'; // 'classique' ou 'tetris'
 
-        // Mode Classique
-        let activePieces = [];
-        const shapesClassic = [ [[0,0], [0,1]], [[0,0], [1,0]], [[0,0], [0,1], [0,2]], [[0,0], [1,0], [2,0]], [[0,0], [0,1], [1,0], [1,1]], [[0,0], [1,0], [1,1]], [[0,1], [1,1], [1,0]], [[0,0], [1,0], [2,0], [2,1]], [[0,1], [1,1], [2,1], [2,0]], [[0,0], [0,1], [0,2], [1,1]], [[0,0]] ];
-        
-        // Mode Tetris (Vrai Tetris mécanique)
+        // Variables d'animation & de logique pour le mode Tetris
         let activeTetrisPiece = null;
-        let tetrisAnimId = null;
-        let dropInterval = 800; 
+        let tetrisTimerId = null;
         let lastDropTime = 0;
-        const shapesTetris = [ [[0,0], [0,1], [0,2], [0,3]], [[0,0], [0,1], [1,0], [1,1]], [[0,1], [1,0], [1,1], [1,2]], [[0,1], [0,2], [1,0], [1,1]], [[0,0], [0,1], [1,1], [1,2]], [[0,0], [1,0], [1,1], [1,2]], [[0,2], [1,0], [1,1], [1,2]] ];
+        const dropInterval = 800; // Vitesse de chute automatique (800ms)
 
-        // --- EASTER EGG SÉCURISÉ ET AMUSANT ---
-        let logoClickCount = 0;
-        const logoBtn = document.getElementById('logoBtn');
-        logoBtn.addEventListener('click', () => {
-            logoClickCount++;
-            if (logoClickCount === 5) {
-                // Déclenche l'Easter Egg festif (mode disco/arc-en-ciel)
-                logoBtn.innerText = "🌈";
-                alert("🎉 Easter Egg Activé ! Mode Disco Arc-en-ciel débloqué !");
-                document.body.style.background = "linear-gradient(45deg, #f43f5e, #3b82f6, #10b981)";
-                logoClickCount = 0;
-            }
+        const colors = [
+            '#38bdf8', // bleu ciel
+            '#ec4899', // rose
+            '#eab308', // jaune
+            '#22c55e', // vert
+            '#a855f7', // violet
+            '#f97316', // orange
+            '#ef4444'  // rouge
+        ];
+
+        // Formes Classiques (Block Blast)
+        const pieceTemplatesClassic = [
+            [[0,0], [0,1]], 
+            [[0,0], [1,0]], 
+            [[0,0], [0,1], [0,2]], 
+            [[0,0], [1,0], [2,0]], 
+            [[0,0], [0,1], [1,0], [1,1]], 
+            [[0,0], [1,0], [1,1]], 
+            [[0,1], [1,1], [1,0]], 
+            [[0,0], [1,0], [2,0], [2,1]], 
+            [[0,1], [1,1], [2,1], [2,0]], 
+            [[0,0], [0,1], [0,2], [1,1]], 
+            [[0,0]] 
+        ];
+
+        // Véritables Formes Tetris (Tetrominos)
+        const pieceTemplatesTetris = [
+            [[0,0], [0,1], [0,2], [0,3]], // I
+            [[0,0], [0,1], [1,0], [1,1]], // O
+            [[0,1], [1,0], [1,1], [1,2]], // T
+            [[0,1], [0,2], [1,0], [1,1]], // S
+            [[0,0], [0,1], [1,1], [1,2]], // Z
+            [[0,0], [1,0], [1,1], [1,2]], // J
+            [[0,2], [1,0], [1,1], [1,2]]  // L
+        ];
+
+        // --- GESTION DU MENU ET SELECTION DIRECTE ---
+        document.getElementById('btnLaunchClassic').addEventListener('click', () => {
+            currentMode = 'classique';
+            BOARD_ROWS = 8;
+            BOARD_COLS = 8;
+            modeIndicatorLabel.innerText = "Block Blast";
+            bestScoreElement.innerText = bestScoreClassic;
+            
+            boardElement.className = "board classic-mode";
+            piecesPoolElement.style.display = "flex";
+            tetrisControls.style.display = "none";
+            
+            mainMenu.classList.add('hidden');
+            resetGame();
         });
 
-        document.getElementById('btnLaunch').addEventListener('click', () => document.getElementById('mainMenu').classList.add('hidden'));
+        document.getElementById('btnLaunchTetris').addEventListener('click', () => {
+            currentMode = 'tetris';
+            BOARD_ROWS = 20;
+            BOARD_COLS = 10;
+            modeIndicatorLabel.innerText = "Tetris";
+            bestScoreElement.innerText = bestScoreTetris;
 
-        document.getElementById('modeBtn').addEventListener('click', () => {
-            currentMode = currentMode === 'classique' ? 'tetris' : 'classique';
-            const btn = document.getElementById('modeBtn');
-            btn.className = `mode-selector ${currentMode === 'tetris' ? 'tetris-active' : ''}`;
-            btn.innerHTML = currentMode === 'tetris' ? '🧩 <span>Tetris</span>' : '🎮 <span>Classique</span>';
+            boardElement.className = "board tetris-mode";
+            piecesPoolElement.style.display = "none";
+            tetrisControls.style.display = "flex";
+
+            mainMenu.classList.add('hidden');
             resetGame();
+        });
+
+        document.getElementById('btnBackToMenu').addEventListener('click', () => {
+            stopTetrisLoop();
+            mainMenu.classList.remove('hidden');
         });
 
         function createBoard() {
             boardElement.innerHTML = '';
-            boardElement.className = `board ${currentMode}`;
             for (let r = 0; r < BOARD_ROWS; r++) {
                 for (let c = 0; c < BOARD_COLS; c++) {
                     const cell = document.createElement('div');
-                    cell.className = 'cell'; cell.dataset.row = r; cell.dataset.col = c;
+                    cell.classList.add('cell');
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
                     boardElement.appendChild(cell);
                 }
             }
@@ -226,303 +711,569 @@
                     if (!cell || cell.classList.contains('exploding')) continue;
                     
                     let cellData = grid[r][c];
-                    
+
+                    // En mode Tetris, on fusionne visuellement la pièce en mouvement
                     if (currentMode === 'tetris' && activeTetrisPiece) {
-                        const isPiece = activeTetrisPiece.shape.some(b => activeTetrisPiece.row + b[0] === r && activeTetrisPiece.col + b[1] === c);
-                        if (isPiece) cellData = { color: activeTetrisPiece.color, emoji: currentEmoji };
+                        const isPart = activeTetrisPiece.shape.some(
+                            b => (activeTetrisPiece.row + b[0] === r) && (activeTetrisPiece.col + b[1] === c)
+                        );
+                        if (isPart) {
+                            cellData = { color: activeTetrisPiece.color, emoji: currentEmoji };
+                        }
                     }
-                    
+
                     cell.className = 'cell';
                     if (cellData) {
                         cell.classList.add('block-3d');
                         cell.style.backgroundColor = cellData.color;
                         cell.innerText = cellData.emoji || '';
                     } else {
-                        cell.style.backgroundColor = ''; cell.innerText = '';
+                        cell.style.backgroundColor = '';
+                        cell.innerText = '';
                     }
                 }
             }
         }
 
-        /* ----- VRAIE MÉCANIQUE TETRIS ----- */
+        // --- LOGIQUE COMMUNE D'ALIGNEMENT ET COLLISIONS ---
+        function canPlacePiece(shape, startRow, startCol) {
+            for (let block of shape) {
+                const r = startRow + block[0];
+                const c = startCol + block[1];
+                if (r < 0 || r >= BOARD_ROWS || c < 0 || c >= BOARD_COLS || grid[r][c] !== null) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function canPieceFitSomewhere(shape) {
+            for (let r = 0; r < BOARD_ROWS; r++) {
+                for (let c = 0; c < BOARD_COLS; c++) {
+                    if (canPlacePiece(shape, r, c)) return true;
+                }
+            }
+            return false;
+        }
+
+        // --- FONCTIONNALITÉS DU MODE TETRIS ---
         function spawnTetrisPiece() {
-            const shape = [...shapesTetris[Math.floor(Math.random() * shapesTetris.length)]];
+            const shape = pieceTemplatesTetris[Math.floor(Math.random() * pieceTemplatesTetris.length)];
+            const color = classicColorsToggle.checked 
+                ? colors[Math.floor(Math.random() * colors.length)] 
+                : currentColor;
+
             activeTetrisPiece = {
-                shape: shape, row: 0, col: Math.floor(BOARD_COLS/2) - 1,
-                color: document.getElementById('classicColorsToggle').checked ? colors[Math.floor(Math.random()*colors.length)] : currentColor
+                shape: shape,
+                row: 0,
+                col: Math.floor(BOARD_COLS / 2) - 1,
+                color: color
             };
-            
-            if (!canPlaceTetris(activeTetrisPiece.shape, activeTetrisPiece.row, activeTetrisPiece.col)) {
-                setTimeout(resetGame, 1000); // Game Over
+
+            if (!canPlacePiece(activeTetrisPiece.shape, activeTetrisPiece.row, activeTetrisPiece.col)) {
+                // Game Over en Tetris
+                stopTetrisLoop();
+                setTimeout(resetGame, 1000);
             } else {
                 updateBoardUI();
             }
         }
 
-        function tetrisLoop(time = 0) {
-            if (currentMode !== 'tetris') return;
-            if (time - lastDropTime > dropInterval) {
-                moveTetrisPiece(1, 0); 
-                lastDropTime = time;
-            }
-            tetrisAnimId = requestAnimationFrame(tetrisLoop);
-        }
-
-        function canPlaceTetris(shape, testR, testC) {
-            for (let b of shape) {
-                const r = testR + b[0], c = testC + b[1];
-                if (r < 0 || r >= BOARD_ROWS || c < 0 || c >= BOARD_COLS || grid[r][c] !== null) return false;
-            }
-            return true;
-        }
-
-        function moveTetrisPiece(dRow, dCol) {
+        function moveTetrisPiece(dr, dc) {
             if (!activeTetrisPiece) return;
-            if (canPlaceTetris(activeTetrisPiece.shape, activeTetrisPiece.row + dRow, activeTetrisPiece.col + dCol)) {
-                activeTetrisPiece.row += dRow; activeTetrisPiece.col += dCol; updateBoardUI();
-            } else if (dRow === 1) { 
+            if (canPlacePiece(activeTetrisPiece.shape, activeTetrisPiece.row + dr, activeTetrisPiece.col + dc)) {
+                activeTetrisPiece.row += dr;
+                activeTetrisPiece.col += dc;
+                updateBoardUI();
+            } else if (dr === 1) {
+                // Si la pièce bute vers le bas, on la fige
                 lockTetrisPiece();
             }
         }
 
         function rotateTetrisPiece() {
             if (!activeTetrisPiece) return;
-            const rotated = activeTetrisPiece.shape.map(b => [b[1], -b[0]]);
-            const minR = Math.min(...rotated.map(b => b[0])), minC = Math.min(...rotated.map(b => b[1]));
+            const originalShape = activeTetrisPiece.shape;
+            
+            // Rotation trigonométrique de la forme
+            const rotated = originalShape.map(b => [b[1], -b[0]]);
+            const minR = Math.min(...rotated.map(b => b[0]));
+            const minC = Math.min(...rotated.map(b => b[1]));
             const normalized = rotated.map(b => [b[0] - minR, b[1] - minC]);
 
-            if (canPlaceTetris(normalized, activeTetrisPiece.row, activeTetrisPiece.col)) {
-                activeTetrisPiece.shape = normalized; updateBoardUI();
-            } else if (canPlaceTetris(normalized, activeTetrisPiece.row, activeTetrisPiece.col - 1)) { 
-                activeTetrisPiece.shape = normalized; activeTetrisPiece.col -= 1; updateBoardUI();
-            } else if (canPlaceTetris(normalized, activeTetrisPiece.row, activeTetrisPiece.col + 1)) { 
-                activeTetrisPiece.shape = normalized; activeTetrisPiece.col += 1; updateBoardUI();
+            // Tentative de rotation avec décalages (Wall kicks basiques)
+            if (canPlacePiece(normalized, activeTetrisPiece.row, activeTetrisPiece.col)) {
+                activeTetrisPiece.shape = normalized;
+            } else if (canPlacePiece(normalized, activeTetrisPiece.row, activeTetrisPiece.col - 1)) {
+                activeTetrisPiece.shape = normalized;
+                activeTetrisPiece.col -= 1;
+            } else if (canPlacePiece(normalized, activeTetrisPiece.row, activeTetrisPiece.col + 1)) {
+                activeTetrisPiece.shape = normalized;
+                activeTetrisPiece.col += 1;
             }
+            updateBoardUI();
         }
 
         function lockTetrisPiece() {
-            activeTetrisPiece.shape.forEach(b => {
-                grid[activeTetrisPiece.row + b[0]][activeTetrisPiece.col + b[1]] = { color: activeTetrisPiece.color, emoji: currentEmoji };
+            activeTetrisPiece.shape.forEach(block => {
+                const r = activeTetrisPiece.row + block[0];
+                const c = activeTetrisPiece.col + block[1];
+                grid[r][c] = { color: activeTetrisPiece.color, emoji: currentEmoji };
             });
             activeTetrisPiece = null;
             checkLines();
         }
 
-        // Contrôles Clavier (Q / D et Flèches Gauche / Droite) et Souris / Tactile pour pivoter
-        document.addEventListener('keydown', (e) => {
-            if (currentMode !== 'tetris' || !activeTetrisPiece) return;
-            const k = e.key.toLowerCase();
-            if (k === 'arrowleft' || k === 'q') moveTetrisPiece(0, -1);
-            else if (k === 'arrowright' || k === 'd') moveTetrisPiece(0, 1);
-            else if (k === 'arrowdown' || k === 's') { moveTetrisPiece(1, 0); score++; scoreElement.innerText=score; }
-        });
+        function tetrisTick(time = 0) {
+            if (currentMode !== 'tetris') return;
+            if (time - lastDropTime > dropInterval) {
+                moveTetrisPiece(1, 0);
+                lastDropTime = time;
+            }
+            tetrisTimerId = requestAnimationFrame(tetrisTick);
+        }
 
-        boardElement.addEventListener('mousedown', (e) => { if (currentMode==='tetris') rotateTetrisPiece(); });
-        boardElement.addEventListener('touchstart', (e) => { if (currentMode==='tetris') { e.preventDefault(); rotateTetrisPiece(); } }, {passive: false});
+        function startTetrisLoop() {
+            stopTetrisLoop();
+            lastDropTime = performance.now();
+            tetrisTimerId = requestAnimationFrame(tetrisTick);
+        }
 
-
-        /* ----- MOTEUR CLASSIQUE (Drag & Drop) ----- */
-        function generateClassicRound() {
-            piecesPoolElement.innerHTML = ''; activePieces = [];
-            for (let i = 0; i < 3; i++) {
-                const container = document.createElement('div'); container.className = 'piece-container';
-                const el = document.createElement('div'); el.className = 'piece';
-                
-                const shape = [...shapesClassic[Math.floor(Math.random() * shapesClassic.length)]];
-                const color = document.getElementById('classicColorsToggle').checked ? colors[Math.floor(Math.random()*colors.length)] : currentColor;
-                
-                const pieceData = { id: i, shape, placed: false, color, element: el };
-                activePieces.push(pieceData);
-                
-                rebuildPieceDOM(pieceData); container.appendChild(el); piecesPoolElement.appendChild(container);
-                setupDrag(pieceData);
+        function stopTetrisLoop() {
+            if (tetrisTimerId) {
+                cancelAnimationFrame(tetrisTimerId);
+                tetrisTimerId = null;
             }
         }
 
-        function rebuildPieceDOM(pieceData) {
-            const el = pieceData.element; el.innerHTML = '';
-            const rows = Math.max(...pieceData.shape.map(b => b[0])) + 1, cols = Math.max(...pieceData.shape.map(b => b[1])) + 1;
-            el.style.gridTemplateRows = `repeat(${rows}, 20px)`; el.style.gridTemplateColumns = `repeat(${cols}, 20px)`;
+        // --- DRAG & DROP DU MODE CLASSIQUE (BLOCK BLAST) ---
+        function generateNewRound() {
+            piecesPoolElement.innerHTML = '';
+            activePieces = [];
             
-            const matrix = Array(rows).fill(null).map(() => Array(cols).fill(0));
-            pieceData.shape.forEach(b => matrix[b[0]][b[1]] = 1);
+            for (let i = 0; i < 3; i++) {
+                const container = document.createElement('div');
+                container.classList.add('piece-container');
+                
+                const pieceElement = document.createElement('div');
+                pieceElement.classList.add('piece');
+                pieceElement.dataset.index = i;
 
-            matrix.forEach((row, r) => row.forEach((val, c) => {
-                const cell = document.createElement('div');
-                if (val === 1) {
-                    cell.className = 'piece-cell block-3d'; cell.style.backgroundColor = pieceData.color;
-                    cell.innerText = currentEmoji; cell.dataset.relRow = r; cell.dataset.relCol = c;
-                }
-                el.appendChild(cell);
-            }));
+                const shape = pieceTemplatesClassic[Math.floor(Math.random() * pieceTemplatesClassic.length)];
+                
+                const pieceColor = classicColorsToggle.checked 
+                    ? colors[Math.floor(Math.random() * colors.length)] 
+                    : currentColor;
+
+                const rows = Math.max(...shape.map(b => b[0])) + 1;
+                const cols = Math.max(...shape.map(b => b[1])) + 1;
+                
+                pieceElement.style.gridTemplateRows = `repeat(${rows}, 20px)`;
+                pieceElement.style.gridTemplateColumns = `repeat(${cols}, 20px)`;
+
+                const pieceMatrix = Array(rows).fill(null).map(() => Array(cols).fill(0));
+                shape.forEach(b => pieceMatrix[b[0]][b[1]] = 1);
+
+                pieceMatrix.forEach((row, r) => {
+                    row.forEach((val, c) => {
+                        const cell = document.createElement('div');
+                        if (val === 1) {
+                            cell.classList.add('piece-cell', 'block-3d');
+                            cell.style.backgroundColor = pieceColor;
+                            cell.innerText = currentEmoji;
+                            cell.dataset.relRow = r;
+                            cell.dataset.relCol = c;
+                        } else {
+                            cell.style.background = 'transparent';
+                            cell.style.border = 'none';
+                            cell.style.boxShadow = 'none';
+                        }
+                        pieceElement.appendChild(cell);
+                    });
+                });
+
+                activePieces.push({
+                    id: i,
+                    shape: shape,
+                    placed: false,
+                    color: pieceColor,
+                    element: pieceElement
+                });
+
+                container.appendChild(pieceElement);
+                piecesPoolElement.appendChild(container);
+
+                setupDragAndDrop(pieceElement, shape, i, pieceColor);
+            }
         }
 
-        function setupDrag(pieceData) {
-            const pieceEl = pieceData.element;
-            let startX = 0, startY = 0, currX = 0, currY = 0, isDragging = false;
-            let dragRow = 0, dragCol = 0, lastX = 0, lastY = 0;
+        function setupDragAndDrop(pieceEl, shape, id, pieceColor) {
+            let startTouchX = 0, startTouchY = 0;
+            let currentX = 0, currentY = 0;
+            let isDragging = false;
+            let offsetTouchY = 0;
+            let lastPointerX = 0, lastPointerY = 0;
+            
+            let dragOffsetRow = 0;
+            let dragOffsetCol = 0;
 
             const onStart = (e) => {
                 if (currentMode !== 'classique') return;
-                e.preventDefault(); isDragging = true;
-                startX = e.touches ? e.touches[0].clientX : e.clientX;
-                startY = e.touches ? e.touches[0].clientY : e.clientY;
+                e.preventDefault();
+                isDragging = true;
                 
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                
+                startTouchX = clientX;
+                startTouchY = clientY;
+                offsetTouchY = e.touches ? 80 : 0; 
+
                 pieceEl.classList.add('dragging');
-                const idealSize = boardElement.querySelector('.cell').getBoundingClientRect().width;
-                pieceEl.querySelectorAll('.piece-cell').forEach(c => { c.style.width=`${idealSize}px`; c.style.height=`${idealSize}px`; c.style.fontSize='1.2rem'; });
                 
-                const subCells = pieceEl.querySelectorAll('.piece-cell');
-                let closest = subCells[0], minDst = Infinity;
-                subCells.forEach(s => {
-                    const r = s.getBoundingClientRect(), dst = Math.hypot(startX - (r.left+r.width/2), startY - (r.top+r.height/2));
-                    if (dst < minDst) { minDst = dst; closest = s; }
+                const cellsOnBoard = boardElement.querySelectorAll('.cell');
+                const idealSize = cellsOnBoard[0].getBoundingClientRect().width;
+
+                pieceEl.querySelectorAll('.piece-cell').forEach(c => {
+                    c.style.width = `${idealSize}px`;
+                    c.style.height = `${idealSize}px`;
+                    c.style.fontSize = '1.2rem';
                 });
                 
-                dragRow = parseInt(closest.dataset.relRow); dragCol = parseInt(closest.dataset.relCol);
-                const rect = closest.getBoundingClientRect();
-                startX += ((rect.left+rect.width/2) - startX); startY += ((rect.top+rect.height/2) - startY);
+                const rows = Math.max(...shape.map(b => b[0])) + 1;
+                const cols = Math.max(...shape.map(b => b[1])) + 1;
+                pieceEl.style.gridTemplateRows = `repeat(${rows}, ${idealSize}px)`;
+                pieceEl.style.gridTemplateColumns = `repeat(${cols}, ${idealSize}px)`;
+
+                const subCells = pieceEl.querySelectorAll('.piece-cell');
+                let closestSubCell = subCells[0];
+                let minSubDist = Infinity;
+
+                subCells.forEach(sub => {
+                    const r = sub.getBoundingClientRect();
+                    const centerX = r.left + r.width / 2;
+                    const centerY = r.top + r.height / 2;
+                    const dist = Math.hypot(clientX - centerX, clientY - centerY);
+                    if (dist < minSubDist) {
+                        minSubDist = dist;
+                        closestSubCell = sub;
+                    }
+                });
+
+                dragOffsetRow = parseInt(closestSubCell.dataset.relRow);
+                dragOffsetCol = parseInt(closestSubCell.dataset.relCol);
+
+                const targetRect = closestSubCell.getBoundingClientRect();
+                const subCenterX = targetRect.left + (targetRect.width / 2);
+                const subCenterY = targetRect.top + (targetRect.height / 2);
+
+                startTouchX += (subCenterX - clientX);
+                startTouchY += (subCenterY - clientY);
+
                 onMove(e);
             };
 
             const onMove = (e) => {
                 if (!isDragging) return;
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX, clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                pieceEl.style.transform = `translate3d(${clientX - startX}px, ${(clientY - startY) - (e.touches ? 80 : 0)}px, 0)`;
                 
-                const anc = pieceEl.querySelector(`[data-rel-row='${dragRow}'][data-rel-col='${dragCol}']`);
-                if (anc) { const r = anc.getBoundingClientRect(); lastX = r.left+r.width/2; lastY = r.top+r.height/2; }
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                currentX = clientX - startTouchX;
+                currentY = (clientY - startTouchY) - offsetTouchY;
+
+                pieceEl.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
                 
-                document.querySelectorAll('.cell.preview').forEach(c => { c.classList.remove('preview','block-3d'); c.style.backgroundColor=''; });
-                const target = document.elementFromPoint(lastX, lastY);
-                if (target && target.classList.contains('cell')) {
-                    const r = parseInt(target.dataset.row) - dragRow, c = parseInt(target.dataset.col) - dragCol;
-                    if (canPlaceTetris(pieceData.shape, r, c)) {
-                        pieceData.shape.forEach(b => {
-                            const tc = boardElement.querySelector(`[data-row='${r+b[0]}'][data-col='${c+b[1]}']`);
-                            if(tc){ tc.classList.add('preview','block-3d'); tc.style.backgroundColor=pieceData.color; }
-                        });
+                const activeAncreCell = pieceEl.querySelector(`[data-rel-row='${dragOffsetRow}'][data-rel-col='${dragOffsetCol}']`);
+                if (activeAncreCell) {
+                    const rect = activeAncreCell.getBoundingClientRect();
+                    lastPointerX = rect.left + (rect.width / 2);
+                    lastPointerY = rect.top + (rect.height / 2);
+                }
+
+                clearPreview();
+
+                const targetCell = getCellUnderPoint(lastPointerX, lastPointerY);
+                if (targetCell) {
+                    const startR = parseInt(targetCell.dataset.row) - dragOffsetRow;
+                    const startC = parseInt(targetCell.dataset.col) - dragOffsetCol;
+                    if (canPlacePiece(shape, startR, startC)) {
+                        showPreview(shape, startR, startC, pieceColor);
                     }
                 }
             };
 
             const onEnd = (e) => {
-                if (!isDragging) return; isDragging = false;
-                document.querySelectorAll('.cell.preview').forEach(c => { c.classList.remove('preview','block-3d'); c.style.backgroundColor=''; });
+                if (!isDragging) return;
+                isDragging = false;
                 
-                const target = document.elementFromPoint(lastX, lastY);
-                let placed = false;
-                if (target && target.classList.contains('cell')) {
-                    const stR = parseInt(target.dataset.row) - dragRow, stC = parseInt(target.dataset.col) - dragCol;
-                    if (canPlaceTetris(pieceData.shape, stR, stC)) {
-                        pieceData.shape.forEach(b => grid[stR+b[0]][stC+b[1]] = {color:pieceData.color, emoji:currentEmoji});
-                        pieceEl.remove(); pieceData.placed = true; placed = true;
-                        updateBoardUI(); checkLines();
-                        if (activePieces.every(p => p.placed)) generateClassicRound(); else checkGameOverClassic();
+                clearPreview();
+
+                const targetCell = getCellUnderPoint(lastPointerX, lastPointerY);
+                let placedSuccessfully = false;
+
+                if (targetCell) {
+                    const startR = parseInt(targetCell.dataset.row) - dragOffsetRow;
+                    const startC = parseInt(targetCell.dataset.col) - dragOffsetCol;
+
+                    if (canPlacePiece(shape, startR, startC)) {
+                        shape.forEach(block => {
+                            grid[startR + block[0]][startC + block[1]] = {
+                                color: pieceColor,
+                                emoji: currentEmoji
+                            };
+                        });
+                        
+                        placedSuccessfully = true;
+                        pieceEl.parentElement.innerHTML = ''; 
+                        activePieces.find(p => p.id === id).placed = true;
+
+                        score += shape.length; 
+                        scoreElement.innerText = score;
+
+                        updateBoardUI();
+                        checkLines();
+                        
+                        if (activePieces.every(p => p.placed)) {
+                            generateNewRound();
+                        } else {
+                            checkGameOver();
+                        }
                     }
                 }
-                
-                if (!placed) { pieceEl.classList.remove('dragging'); pieceEl.style.transform='none'; rebuildPieceDOM(pieceData); }
+
+                if (!placedSuccessfully) {
+                    pieceEl.classList.remove('dragging');
+                    pieceEl.style.transform = 'translate3d(0, 0, 0)'; 
+
+                    const rows = Math.max(...shape.map(b => b[0])) + 1;
+                    const cols = Math.max(...shape.map(b => b[1])) + 1;
+                    pieceEl.style.gridTemplateRows = `repeat(${rows}, 20px)`;
+                    pieceEl.style.gridTemplateColumns = `repeat(${cols}, 20px)`;
+
+                    pieceEl.querySelectorAll('.piece-cell').forEach(c => {
+                        c.style.width = ''; 
+                        c.style.height = '';
+                        c.style.fontSize = '';
+                    });
+                }
             };
 
-            pieceEl.addEventListener('mousedown', onStart); window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onEnd);
-            pieceEl.addEventListener('touchstart', onStart, {passive:false}); window.addEventListener('touchmove', onMove, {passive:false}); window.addEventListener('touchend', onEnd);
+            pieceEl.addEventListener('mousedown', onStart);
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('mouseup', onEnd);
+            pieceEl.addEventListener('touchstart', onStart, { passive: false });
+            window.addEventListener('touchmove', onMove, { passive: false });
+            window.addEventListener('touchend', onEnd);
         }
 
-        function checkGameOverClassic() {
-            const unplaced = activePieces.filter(p => !p.placed);
-            let canFit = false;
-            for (let p of unplaced) {
-                for (let r=0; r<BOARD_ROWS; r++) {
-                    for(let c=0; c<BOARD_COLS; c++) {
-                        if (canPlaceTetris(p.shape, r, c)) { canFit = true; break; }
+        function getCellUnderPoint(x, y) {
+            const cells = document.querySelectorAll('.cell');
+            let nearestCell = null;
+            let minDistance = 22; 
+            for (let cell of cells) {
+                const rect = cell.getBoundingClientRect();
+                const cellCenterX = rect.left + rect.width / 2;
+                const cellCenterY = rect.top + rect.height / 2;
+                const dist = Math.hypot(x - cellCenterX, y - cellCenterY);
+                if (dist < minDistance) { minDistance = dist; nearestCell = cell; }
+            }
+            return nearestCell;
+        }
+
+        function showPreview(shape, startR, startC, color) {
+            shape.forEach(block => {
+                const r = startR + block[0]; const c = startC + block[1];
+                const cell = boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`);
+                if (cell) { 
+                    cell.classList.add('preview', 'block-3d'); 
+                    cell.style.backgroundColor = color; 
+                    cell.innerText = currentEmoji;
+                }
+            });
+        }
+
+        function clearPreview() {
+            document.querySelectorAll('.cell.preview').forEach(cell => {
+                cell.classList.remove('preview');
+                cell.style.backgroundColor = ''; 
+                cell.innerText = '';
+                cell.classList.remove('block-3d');
+            });
+        }
+
+        // --- NETTOYAGE DES LIGNES (EXPLOSIONS ET SCORES DÉDIÉS) ---
+        function checkLines() {
+            let rowsToClear = [];
+            let colsToClear = [];
+
+            // Détection horizontale
+            for (let r = 0; r < BOARD_ROWS; r++) {
+                if (grid[r].every(cell => cell !== null)) rowsToClear.push(r);
+            }
+
+            // Détection verticale (uniquement en mode Classique)
+            if (currentMode === 'classique') {
+                for (let c = 0; c < BOARD_COLS; c++) {
+                    let columnFull = true;
+                    for (let r = 0; r < BOARD_ROWS; r++) {
+                        if (grid[r][c] === null) { columnFull = false; break; }
                     }
+                    if (columnFull) colsToClear.push(c);
                 }
             }
-            if (!canFit && unplaced.length > 0) setTimeout(resetGame, 800);
-        }
 
+            const linesCount = rowsToClear.length + colsToClear.length;
 
-        /* ----- MULTIPLICATEUR ET LIGNES ----- */
-        function checkLines() {
-            let rowsToClear = [], colsToClear = [];
-            
-            for (let r=0; r<BOARD_ROWS; r++) if (grid[r].every(c => c !== null)) rowsToClear.push(r);
-            if (currentMode === 'classique') {
-                for (let c=0; c<BOARD_COLS; c++) if (grid.every(r => r[c] !== null)) colsToClear.push(c);
-            }
+            if (linesCount > 0) {
+                // Animation d'explosion
+                rowsToClear.forEach(r => {
+                    for (let c = 0; c < BOARD_COLS; c++) {
+                        boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`).classList.add('exploding');
+                    }
+                });
+                colsToClear.forEach(c => {
+                    for (let r = 0; r < BOARD_ROWS; r++) {
+                        boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`).classList.add('exploding');
+                    }
+                });
 
-            const total = rowsToClear.length + colsToClear.length;
-
-            if (total > 0) {
-                combo++;
-                comboMultiplierText.innerText = 'x' + combo;
-                comboContainer.style.display = 'flex';
-                
-                rowsToClear.forEach(r => { for(let c=0; c<BOARD_COLS; c++) boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`).classList.add('exploding'); });
-                colsToClear.forEach(c => { for(let r=0; r<BOARD_ROWS; r++) boardElement.querySelector(`[data-row='${r}'][data-col='${c}']`).classList.add('exploding'); });
-
+                // Application du nettoyage après l'animation
                 setTimeout(() => {
                     if (currentMode === 'classique') {
-                        rowsToClear.forEach(r => grid[r].fill(null));
-                        colsToClear.forEach(c => { for(let r=0; r<BOARD_ROWS; r++) grid[r][c] = null; });
+                        rowsToClear.forEach(r => { for (let c = 0; c < BOARD_COLS; c++) grid[r][c] = null; });
+                        colsToClear.forEach(c => { for (let r = 0; r < BOARD_ROWS; r++) grid[r][c] = null; });
                     } else {
-                        // Vrai Tetris : Gravité réelle
-                        rowsToClear.forEach(r => {
+                        // En mode Tetris: Affaissement des lignes supérieures vers le bas
+                        // On supprime les lignes pleines de bas en haut
+                        rowsToClear.sort((a, b) => a - b).forEach(r => {
                             grid.splice(r, 1);
                             grid.unshift(Array(BOARD_COLS).fill(null));
                         });
                     }
 
-                    document.querySelectorAll('.cell.exploding').forEach(c => { c.classList.remove('exploding','block-3d'); });
+                    document.querySelectorAll('.cell.exploding').forEach(cell => {
+                        cell.classList.remove('exploding', 'block-3d');
+                        cell.style.backgroundColor = '';
+                        cell.innerText = '';
+                    });
+                    
                     updateBoardUI();
-                    if (currentMode === 'tetris') spawnTetrisPiece();
+
+                    if (currentMode === 'tetris') {
+                        spawnTetrisPiece();
+                    } else {
+                        checkGameOver();
+                    }
                 }, 350);
 
-                score += total * 100 * combo;
+                // Barème de score distinct
+                if (currentMode === 'tetris') {
+                    if (linesCount === 4) score += 800; // Bonus Tetris !
+                    else score += linesCount * 100;
+                } else {
+                    score += linesCount * 100;
+                }
+                
                 scoreElement.innerText = score;
-                if (score > bestScore) { bestScore = score; document.getElementById('best-score').innerText = bestScore; localStorage.setItem('bb_score', bestScore); }
 
+                // Sauvegarde du meilleur score par mode
+                if (currentMode === 'classique') {
+                    if (score > bestScoreClassic) {
+                        bestScoreClassic = score;
+                        bestScoreElement.innerText = bestScoreClassic;
+                        localStorage.setItem('block_blast_best', bestScoreClassic);
+                    }
+                } else {
+                    if (score > bestScoreTetris) {
+                        bestScoreTetris = score;
+                        bestScoreElement.innerText = bestScoreTetris;
+                        localStorage.setItem('tetris_best', bestScoreTetris);
+                    }
+                }
             } else {
-                combo = 0; comboContainer.style.display = 'none';
-                if (currentMode === 'tetris') spawnTetrisPiece();
+                if (currentMode === 'tetris') {
+                    spawnTetrisPiece();
+                }
             }
         }
 
+        function checkGameOver() {
+            const unplacedPieces = activePieces.filter(p => !p.placed);
+            let atLeastOneCanFit = false;
+            for (let piece of unplacedPieces) {
+                if (canPieceFitSomewhere(piece.shape)) { atLeastOneCanFit = true; break; }
+            }
+            if (!atLeastOneCanFit && unplacedPieces.length > 0) {
+                setTimeout(resetGame, 500);
+            }
+        }
 
-        /* ----- INITIALISATION ----- */
+        // --- REMISE À ZÉRO ET CONFIGURATION ---
         function resetGame() {
-            score = 0; scoreElement.innerText = score;
-            combo = 0; comboContainer.style.display = 'none';
-            if (tetrisAnimId) { cancelAnimationFrame(tetrisAnimId); tetrisAnimId = null; }
-            
-            if (currentMode === 'classique') {
-                BOARD_ROWS = 8; BOARD_COLS = 8;
-                piecesPoolElement.style.display = 'flex';
-            } else {
-                BOARD_ROWS = 20; BOARD_COLS = 10;
-                piecesPoolElement.style.display = 'none';
-            }
-            
+            score = 0; 
+            scoreElement.innerText = score; 
             grid = Array(BOARD_ROWS).fill(null).map(() => Array(BOARD_COLS).fill(null));
-            createBoard(); updateBoardUI();
             
-            if (currentMode === 'classique') { generateClassicRound(); } 
-            else { spawnTetrisPiece(); lastDropTime = performance.now(); tetrisAnimId = requestAnimationFrame(tetrisLoop); }
+            createBoard();
+            updateBoardUI(); 
+
+            if (currentMode === 'classique') {
+                stopTetrisLoop();
+                generateNewRound();
+            } else {
+                spawnTetrisPiece();
+                startTetrisLoop();
+            }
         }
 
-        // Paramètres
-        document.getElementById('openSettings').addEventListener('click', () => document.getElementById('settingsModal').style.display='flex');
-        document.getElementById('closeSettings').addEventListener('click', () => {
-            currentEmoji = document.getElementById('emojiInput').value;
-            currentColor = document.getElementById('pieceColorPicker').value;
-            document.getElementById('settingsModal').style.display='none';
-            updateBoardUI();
-            if (currentMode === 'classique') piecesPoolElement.childNodes.forEach(c => { const d = activePieces.find(p => p.element===c.firstChild); if(d){ d.color=currentColor; rebuildPieceDOM(d); }});
-            else if (activeTetrisPiece && !document.getElementById('classicColorsToggle').checked) { activeTetrisPiece.color = currentColor; updateBoardUI(); }
+        // --- CONTRÔLES TACTILES ET CLAVIER (TETRIS) ---
+        document.getElementById('ctrlLeft').addEventListener('click', () => { if (currentMode === 'tetris') moveTetrisPiece(0, -1); });
+        document.getElementById('ctrlRotate').addEventListener('click', () => { if (currentMode === 'tetris') rotateTetrisPiece(); });
+        document.getElementById('ctrlRight').addEventListener('click', () => { if (currentMode === 'tetris') moveTetrisPiece(0, 1); });
+        document.getElementById('ctrlDown').addEventListener('click', () => { if (currentMode === 'tetris') { moveTetrisPiece(1, 0); score++; scoreElement.innerText = score; } });
+
+        document.addEventListener('keydown', (e) => {
+            if (currentMode !== 'tetris') return;
+            const k = e.key.toLowerCase();
+            if (k === 'arrowleft' || k === 'q') moveTetrisPiece(0, -1);
+            else if (k === 'arrowright' || k === 'd') moveTetrisPiece(0, 1);
+            else if (k === 'arrowup' || k === 'z') rotateTetrisPiece();
+            else if (k === 'arrowdown' || k === 's') { moveTetrisPiece(1, 0); score++; scoreElement.innerText = score; }
+        });
+
+        // --- PARAMÈTRES ET COLORATION ---
+        pieceColorPicker.addEventListener('input', (e) => {
+            pieceColorText.value = e.target.value.toUpperCase();
+        });
+        pieceColorText.addEventListener('input', (e) => {
+            if(/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                pieceColorPicker.value = e.target.value;
+            }
+        });
+
+        bgColorPicker.addEventListener('input', (e) => {
+            bgColorText.value = e.target.value.toUpperCase();
+        });
+        bgColorText.addEventListener('input', (e) => {
+            if(/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                bgColorPicker.value = e.target.value;
+            }
+        });
+
+        document.getElementById('openSettings').addEventListener('click', () => {
+            modal.style.display = 'flex';
         });
         
-        resetGame(); 
+        document.getElementById('closeSettings').addEventListener('click', () => {
+            currentEmoji = emojiInput.value.trim();
+            currentColor = pieceColorPicker.value;
+
+            document.documentElement.style.setProperty('--bg-color', bgColorPicker.value);
+
+            modal.style.display = 'none';
+            resetGame();
+        });
     </script>
 </body>
 </html>
