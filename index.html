@@ -3,8 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Block Blaster">
+    
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
+    <link rel="shortcut icon" href="logo.png">
+
     <title>Block Blaster</title>
     <style>
         :root {
@@ -59,11 +66,12 @@
         }
 
         .menu-logo {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             object-fit: contain;
-            border-radius: 18px;
+            border-radius: 22px;
             box-shadow: 0 10px 25px rgba(78, 205, 196, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
         }
 
         /* Titre 3D Coloré */
@@ -98,7 +106,7 @@
             border-radius: 40px;
             cursor: pointer;
             box-shadow: 0 10px 30px rgba(78, 205, 196, 0.4);
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s;
         }
 
         .btn-launch:active {
@@ -321,7 +329,7 @@
         .setting-row { display: flex; flex-direction: column; gap: 6px; }
         .setting-row label { font-size: 0.75rem; color: #62627a; text-transform: uppercase; font-weight: 700; }
         
-        select, input[type="text"] {
+        input[type="text"] {
             background: #1a1a23;
             border: 1px solid rgba(255,255,255,0.08);
             color: white;
@@ -329,6 +337,32 @@
             border-radius: 10px;
             font-weight: 600;
             outline: none;
+        }
+
+        /* Picker de couleur moderne */
+        .color-inputs {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .color-inputs input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            background: none;
+        }
+
+        .color-inputs input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-inputs input[type="color"]::-webkit-color-swatch {
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
         }
 
         .toggle-group {
@@ -344,7 +378,7 @@
 <body>
 
     <div id="mainMenu">
-        <img class="menu-logo" src="logo.png" alt="Logo" onerror="this.style.display='none'">
+        <img class="menu-logo" src="logo.png" alt="Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%234ecdc4%22 rx=%2220%22/><text y=%2260%22 x=%2220%22 font-size=%2250%22>🧩</text></svg>'">
         <h1 class="title-3d">Block Blaster</h1>
         <button class="btn-launch" id="btnLaunch">JOUER</button>
         <div class="credits">créé par x1dl</div>
@@ -367,15 +401,8 @@
             <h3>PARAMÈTRES</h3>
             
             <div class="setting-row">
-                <label>Emoji des Blocs</label>
-                <select id="emojiSelector">
-                    <option value="">Aucun (Style Pur)</option>
-                    <option value="⭐️">⭐️ Étoile</option>
-                    <option value="💎">💎 Diamant</option>
-                    <option value="🔥">🔥 Feu</option>
-                    <option value="👾">👾 Monstre</option>
-                    <option value="❤️">❤️ Cœur</option>
-                </select>
+                <label>Tapez l'emoji de votre choix (Ex: 👾, 🔥, 💎...)</label>
+                <input type="text" id="emojiInput" maxlength="2" placeholder="Pas d'emoji">
             </div>
 
             <div class="setting-row">
@@ -385,12 +412,10 @@
 
             <div class="setting-row">
                 <label>Couleur unie du fond</label>
-                <select id="bgColorSelector">
-                    <option value="#08080c">Sombre Spatial</option>
-                    <option value="#120c1f">Néon Violet</option>
-                    <option value="#0d1b2a">Bleu Profond</option>
-                    <option value="#1a0f0f">Rouge Crépuscule</option>
-                </select>
+                <div class="color-inputs">
+                    <input type="color" id="bgColorPicker" value="#08080c">
+                    <input type="text" id="bgColorText" value="#08080c" style="flex-grow: 1;">
+                </div>
             </div>
 
             <div class="setting-row toggle-group">
@@ -412,15 +437,16 @@
         const modal = document.getElementById('settingsModal');
         const mainMenu = document.getElementById('mainMenu');
         
-        // Options de personnalisation
-        const emojiSelector = document.getElementById('emojiSelector');
+        // Eléments de personnalisation libres
+        const emojiInput = document.getElementById('emojiInput');
         const bgInput = document.getElementById('bgInput');
-        const bgColorSelector = document.getElementById('bgColorSelector');
+        const bgColorPicker = document.getElementById('bgColorPicker');
+        const bgColorText = document.getElementById('bgColorText');
         const classicColorsToggle = document.getElementById('classicColorsToggle');
 
         let score = 0;
         let comboCount = 1.0; 
-        let badPlacementsCount = 0; // Compteur pour reset le combo après 5 mauvais placements
+        let badPlacementsCount = 0; 
         let isFirstRound = true; 
         let bestScore = localStorage.getItem('block_blast_best') || 0;
         bestScoreElement.innerText = bestScore;
@@ -433,12 +459,12 @@
         // Palette Classique Block Blast
         const classicColors = ['#ff5e7e', '#a370f7', '#ffbe0b', '#4ecdc4', '#3a86c8', '#ff007f'];
 
-        // Lancement du jeu depuis le menu
+        // Lancement du jeu
         document.getElementById('btnLaunch').addEventListener('click', () => {
             mainMenu.style.display = 'none';
         });
 
-        // Modèles de pièces de base
+        // Modèles de pièces
         const pieceTemplates = [
             [[0,0], [0,1]], 
             [[0,0], [1,0]], 
@@ -539,7 +565,6 @@
 
                 const shape = getSmartPieceTemplate(i);
                 
-                // Assigne une couleur unique à la pièce en mode classique
                 const pieceColor = classicColorsToggle.checked 
                     ? classicColors[Math.floor(Math.random() * classicColors.length)] 
                     : currentColor;
@@ -608,7 +633,6 @@
 
                 pieceEl.classList.add('dragging');
                 
-                // Adapte la taille des cellules à la grille de jeu lors de la saisie
                 const cellsOnBoard = boardElement.querySelectorAll('.cell');
                 const idealSize = cellsOnBoard[0].getBoundingClientRect().width;
 
@@ -707,7 +731,7 @@
                         pieceEl.parentElement.innerHTML = ''; 
                         activePieces.find(p => p.id === id).placed = true;
 
-                        // RÈGLE FIDÈLE : 1 point par bloc physique posé
+                        // RÈGLE FIDÈLE : 1 point par bloc physique posé (1x1 = 1pt, 3x3 = 9pts)
                         score += shape.length; 
                         scoreElement.innerText = score;
 
@@ -799,8 +823,8 @@
             const linesCount = rowsToClear.length + colsToClear.length;
 
             if (linesCount > 0) {
-                badPlacementsCount = 0; // On réinitialise les "mauvais" placements car on a fait une ligne
-                comboCount = parseFloat((comboCount + 0.1).toFixed(1)); // Augmente de 0.1 (1.1, 1.2, etc.)
+                badPlacementsCount = 0; 
+                comboCount = parseFloat((comboCount + 0.1).toFixed(1)); 
                 showComboUI();
 
                 rowsToClear.forEach(r => {
@@ -840,7 +864,8 @@
                     checkGameOver();
                 }, 250);
 
-                let calculatedScore = Math.round(1000 * linesCount * comboCount);
+                // NOUVEAU SYSTÈME DE POINTS : 33 points par ligne/colonne vidée
+                let calculatedScore = Math.round(33 * linesCount * comboCount);
                 score += calculatedScore;
                 scoreElement.innerText = score;
 
@@ -849,10 +874,9 @@
                     localStorage.setItem('block_blast_best', bestScore);
                 }
             } else {
-                // Pas de ligne complétée
                 badPlacementsCount++;
                 if (badPlacementsCount >= 5) {
-                    comboCount = 1.0; // Reset du multiplicateur
+                    comboCount = 1.0; 
                     badPlacementsCount = 0;
                     hideComboUI();
                 }
@@ -888,27 +912,38 @@
             updateBoardUI(); generateNewRound();
         }
 
-        // --- ENREGISTREMENT ET PARAMÈTRES ---
-        document.getElementById('openSettings').addEventListener('click', () => modal.style.display = 'flex');
+        // Synchro Couleur entre le Sélecteur et le Texte Hexadécimal
+        bgColorPicker.addEventListener('input', (e) => {
+            bgColorText.value = e.target.value.toUpperCase();
+        });
+        bgColorText.addEventListener('input', (e) => {
+            if(/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                bgColorPicker.value = e.target.value;
+            }
+        });
+
+        // --- SAUVEGARDE ET PARAMÈTRES ---
+        document.getElementById('openSettings').addEventListener('click', () => {
+            modal.style.display = 'flex';
+        });
         
         document.getElementById('closeSettings').addEventListener('click', () => {
-            currentEmoji = emojiSelector.value;
+            currentEmoji = emojiInput.value.trim();
             
-            // Fond d'écran Image
+            // Image URL pour le fond
             if (bgInput.value.trim() !== '') {
                 document.documentElement.style.setProperty('--bg-image', `url(${bgInput.value.trim()})`);
             } else {
                 document.documentElement.style.setProperty('--bg-image', 'none');
             }
 
-            // Fond d'écran Couleur
-            document.documentElement.style.setProperty('--bg-color', bgColorSelector.value);
+            // Couleur de fond libre
+            document.documentElement.style.setProperty('--bg-color', bgColorPicker.value);
 
             modal.style.display = 'none';
             updateBoardUI();
         });
 
-        // Adaptation dynamique des dimensions lors de la rotation de l'écran (tablettes et smartphones)
         window.addEventListener('resize', () => {
             updateBoardUI();
         });
